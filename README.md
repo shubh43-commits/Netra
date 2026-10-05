@@ -8,7 +8,6 @@
 [![YOLOv8 Vision](https://img.shields.io/badge/vision-YOLOv8%20%2B%20ONNX-orange.svg)](https://github.com/ultralytics/ultralytics)
 [![Accessibility](https://img.shields.io/badge/accessibility-WCAG%20AAA%20Compliant-success.svg)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 [![PWA](https://img.shields.io/badge/pwa-offline%20ready-blueviolet.svg)](https://web.dev/progressive-web-apps/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-49%20passed%20%7C%20100%25-brightgreen.svg)](tests/)
 
 **Accessible, real-time spatial orientation, monocular obstacle detection, and binaural 3D directional audio guidance aid for individuals who are blind or visually impaired.**
@@ -157,20 +156,6 @@ NetraAI/
 
 ---
 
-## 🚦 Interactive Web Interfaces
-
-| Page Route | URL Path | Description |
-| :--- | :--- | :--- |
-| **Home Landing** | `/` | Responsive landing page with Three.js 3D echolocation hero scene, Calm mode toggle, and bilingual switcher. |
-| **Street Simulator** | `/demo/` | Interactive obstacle simulator with spatial stereo panning and audio cues without requiring a camera. |
-| **Live Navigation** | `/navigate/` | Camera viewport with live canvas radar, directional audio synthesize, and distance warnings. |
-| **App Settings** | `/settings/` | Audio pitch, warning distance threshold, vibration haptics, and emergency contacts. |
-| **User Profile** | `/profile/` | Active profile dashboard showing linked phones, safety configurations, and admin shortcuts. |
-| **Authentication** | `/login/` & `/signup/` | Accessible authentication with guest device auto-merge and active profile cards. |
-| **Administration** | `/admin/` | High-contrast accessible Django Admin dashboard with Netra branding. |
-
----
-
 ## 📡 REST API & WebSocket Reference
 
 Interactive Swagger UI documentation is available at **`/api/docs/`** (or ReDoc at **`/api/redoc/`**).
@@ -193,61 +178,6 @@ Interactive Swagger UI documentation is available at **`/api/docs/`** (or ReDoc 
 
 ---
 
-## ⚡ Quickstart & Local Setup
-
-### 1. Prerequisites
-- **Python**: 3.11, 3.12, or 3.13
-- **Git**
-- Optional: Virtual environment (`venv`)
-
-### 2. Clone and Setup Environment
-```bash
-git clone https://github.com/<your-username>/NetraAI.git
-cd NetraAI
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# Windows (PowerShell):
-.\venv\Scripts\Activate.ps1
-# macOS / Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### 3. Compile Bilingual Translation Catalogs
-Netra comes with built-in English and Hindi message catalogs. Compile them with the zero-dependency utility:
-```bash
-python scripts/compile_locales.py
-```
-
-### 4. Database Migrations & Initial Setup
-```bash
-python manage.py migrate
-```
-
-### 5. Launch Development Server
-```bash
-python manage.py runserver 127.0.0.1:8000
-```
-*Or launch directly via Daphne ASGI:*
-```bash
-daphne -b 127.0.0.1 -p 8000 config.asgi:application
-```
-
-Visit **http://127.0.0.1:8000** in your browser.
-
-> [!TIP]
-> **Default Superuser / Admin Credentials**:
-> - **Username**: `admin`
-> - **Password**: `admin123`
-> - Access the admin portal at `http://127.0.0.1:8000/admin/` or `/login/`.
-
----
-
 ## 🧪 Testing & Verification
 
 Netra features a **100% passing test suite** covering unit, integration, and live end-to-end scenarios.
@@ -263,33 +193,6 @@ With the server running on port 8000, verify all 24 production user and API flow
 ```bash
 python scripts/test_all_cases.py
 ```
-*Output: 29/29 live system checks passed with 100% success.*
-
----
-
-## ☁️ Free Cloud Deployment
-
-Netra includes deployment manifests for free cloud hosting platforms:
-
-### 1. [Render.com](https://render.com) (Recommended)
-1. Push your repository to GitHub.
-2. Sign in to Render and click **New +** $\rightarrow$ **Web Service**.
-3. Select your repository. Render will automatically detect [`render.yaml`](render.yaml) and [`Procfile`](Procfile).
-4. Configure environment variables:
-   - `DJANGO_SETTINGS_MODULE` = `config.settings.dev`
-   - `SECRET_KEY` = *(generate random string)*
-5. Click **Deploy**. Your app is live with automatic free SSL (`https://<app>.onrender.com`).
-
-### 2. [Koyeb](https://www.koyeb.com) (24/7 Zero-Sleep Free Tier)
-1. Connect your repository to Koyeb.
-2. Koyeb will automatically detect the production [`Dockerfile`](Dockerfile).
-3. Set port to `8000` and deploy.
-
-### 3. Docker Compose (Self-Hosted / VPS)
-```bash
-docker-compose up --build -d
-```
-Runs Daphne ASGI, PostgreSQL, Redis, and Nginx with automatic static file serving.
 
 ---
 
@@ -302,12 +205,6 @@ Contributions to make Netra more accessible, accurate, and helpful for visually 
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
----
-
-## 📄 License
-
-Distributed under the **MIT License**. See `LICENSE` for more information.
 
 ---
 
