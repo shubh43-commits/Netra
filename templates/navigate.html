@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Netra: Live Navigation" %} &middot; Netra{% endblock %}
+
+{% block content %}
+<main id="main" class="wrap page-hero" style="padding-top: 100px;">
+  <span class="sticker" style="margin-bottom: 20px;">{% trans "camera assist" %} &middot; {% trans "on-device AI" %}</span>
+  <h1>{% trans "Live" %} <mark>{% trans "Navigation." %}</mark></h1>
+  <p class="lead">{% trans "Hold your phone steady at chest height. Netra tracks obstacles in real time, warns you of approaching hazards through stereo earphones, and guides your path." %}</p>
+
+  <!-- Live Speech-Bubble Alert Feedback -->
+  <div class="bubble" role="status" aria-live="polite" style="margin-bottom: 20px; max-width: 640px;">
+    <span class="pulse" aria-hidden="true"></span>
+    <div>
+      <small>{% trans "Netra voice announcement" %}</small>
+      <span id="navAlert" style="font-weight: 700; color: var(--ink);">{% trans "Ready. Press 'Start Walking' to activate camera and audio." %}</span>
+    </div>
+  </div>
+
+  <!-- Camera Fallback Notice if Permission Denied or on Desktop -->
+  <div id="cameraFallback" style="display: none; background: #ffd9b8; border: 2px solid var(--ink); border-radius: 16px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 4px 4px 0 var(--ink);">
+    <h4 style="margin: 0 0 6px;">{% trans "Camera access not detected" %}</h4>
+    <p style="margin: 0 0 12px; font-size: 0.95rem;">{% trans "If you are testing on a laptop or denied camera permissions, you can use our built-in virtual test feed or the interactive Street Simulator." %}</p>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <button id="useTestFeed" class="chip" style="cursor: pointer; font-weight: 700; background: var(--ink); color: #fff;">
+        {% trans "Run with Virtual Test Feed" %}
+      </button>
+      <a href="{% url 'demo' %}" class="chip" style="font-weight: 700; background: #fff; text-decoration: none;">
+        {% trans "Open Street Simulator" %} &rarr;
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Camera & Radar Layout -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    
+    <!-- Camera Viewport Card -->
+    <div class="page-card" style="margin-top: 0; padding: 20px; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="font-size: 1.2rem; margin: 0;">{% trans "Camera Viewport" %}</h3>
+        <span class="chip" style="font-size: 0.85rem; padding: 4px 10px;">
+          Latency: <b id="statLatency">-- ms</b>
+        </span>
+      </div>
+
+      <!-- Video with Canvas Overlay -->
+      <div style="position: relative; width: 100%; height: 380px; border-radius: 18px; overflow: hidden; border: 2px solid var(--ink); background: #15121f;">
+        <video id="cameraFeed" playsinline autoplay muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+        <canvas id="overlayCanvas" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+      </div>
+
+      <!-- Tactile Start / Stop Button & Double Tap Hint -->
+      <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 8px;">
+        <button id="navToggle" class="btn pri" style="min-height: 64px; font-size: 1.2rem; width: 100%;">
+          ▶ {% trans "Start Walking" %}
+        </button>
+        <small style="text-align: center; color: var(--mute);">
+          {% trans "Tip: You can also double-tap the camera view to toggle navigation on/off." %}
+        </small>
+      </div>
+    </div>
+
+    <!-- Spatial Radar & Intelligent Tools Card -->
+    <div class="page-card" style="margin-top: 0; padding: 20px; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="font-size: 1.2rem; margin: 0;">{% trans "Spatial Radar (Top-Down)" %}</h3>
+        <span class="chip" style="font-size: 0.85rem; padding: 4px 10px;">
+          Hazards: <b id="statHazards">0</b>
+        </span>
+      </div>
+
+      <div style="position: relative; width: 100%; height: 260px; border-radius: 18px; border: 2px solid var(--ink); background: #fdfaf5; display: flex; align-items: center; justify-content: center;">
+        <canvas id="navRadarCanvas" style="width: 100%; height: 100%;"></canvas>
+      </div>
+
+      <!-- Audio & Language Quick Toggles -->
+      <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+        <button id="soundToggle" class="chip" style="cursor: pointer; font-weight: 700;" aria-pressed="true">
+          🔊 {% trans "Sound: ON" %}
+        </button>
+        <button id="langToggle" class="chip" style="cursor: pointer; font-weight: 700;">
+          🌐 {% trans "English" %}
+        </button>
+      </div>
+
+      <!-- Cloud Assistive Tools (Describe & OCR) -->
+      <div style="margin-top: 20px; border-top: 1px solid rgba(21,18,31,0.1); padding-top: 16px;">
+        <h4 style="margin: 0 0 10px; font-size: 1rem;">{% trans "Assistive Vision Tools" %}</h4>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button id="describeBtn" class="btn sec" style="flex: 1; min-height: 52px; font-size: 0.95rem;">
+            🎙️ {% trans "Describe Scene" %}
+          </button>
+          <button id="ocrBtn" class="btn sec" style="flex: 1; min-height: 52px; font-size: 0.95rem;">
+            🔤 {% trans "Read Signs (OCR)" %}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Action Links -->
+  <div class="cta" style="margin: 0 0 60px;">
+    <a class="btn sec" href="{% url 'demo' %}">{% trans "Try Interactive Street Simulator" %} &rarr;</a>
+    <a class="btn sec" href="{% url 'home' %}">&larr; {% trans "Back to Home" %}</a>
+  </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/audio.js' %}"></script>
+<script src="{% static 'js/radar.js' %}"></script>
+<script src="{% static 'js/navigate.js' %}"></script>
+{% endblock %}

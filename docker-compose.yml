@@ -1,0 +1,119 @@
+services:
+  # ----------------------------------------------------------------------------
+  # Web Application (Django 5 + Daphne ASGI)
+  # ----------------------------------------------------------------------------
+  web:
+    build: .
+    command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - DEBUG=True
+      - SECRET_KEY=docker-dev-secret-key-netra-ai-hackathon-2026
+      - DATABASE_URL=postgresql://netra_user:netra_pass@postgres:5432/netra_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # Celery Asynchronous Task Worker
+  # ----------------------------------------------------------------------------
+  worker:
+    build: .
+    command: celery -A config worker --loglevel=info --concurrency=2
+    volumes:
+      - .:/app
+      - media_volume:/app/media
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - DATABASE_URL=postgresql://netra_user:netra_pass@postgres:5432/netra_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # Celery Beat Scheduled Task Scheduler
+  # ----------------------------------------------------------------------------
+  beat:
+    build: .
+    command: celery -A config beat --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - DATABASE_URL=postgresql://netra_user:netra_pass@postgres:5432/netra_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # PostgreSQL 16 Database
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=netra_db
+      - POSTGRES_USER=netra_user
+      - POSTGRES_PASSWORD=netra_pass
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U netra_user -d netra_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # Redis 7 In-Memory Cache & Message Broker
+  # ----------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # Nginx Reverse Proxy (Static, Media & WebSockets)
+  # ----------------------------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

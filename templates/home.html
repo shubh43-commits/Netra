@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block content %}
+<header class="hero" id="top">
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <span class="sticker">{% trans "free" %} &middot; {% trans "offline" %} &middot; {% trans "no extra gadgets" %}</span>
+    <h1>{% trans "Your phone just got" %} <mark>{% trans "eyes." %}</mark></h1>
+    <p class="lead">{% trans "Netra spots cars, people, stairs and potholes through your camera, then tells you where they are. Out loud, in Hindi or English, from the side they're on." %}</p>
+    <div class="cta">
+      <a class="btn pri" href="{% url 'navigate' %}">{% trans "Start walking" %} &rarr;</a>
+      <a class="btn sec" href="{% url 'demo' %}">{% trans "Try the demo" %}</a>
+    </div>
+    <div class="bubble" id="heroBubble" role="button" tabindex="0" title="{% trans 'Click to hear audio and spatial beeps' %}" aria-live="polite" style="cursor: pointer;">
+      <span class="pulse" aria-hidden="true"></span>
+      <div>
+        <small>{% trans "Netra says" %} &middot; <span style="text-decoration: underline;">{% trans "Click to hear" %} 🔊</span></small>
+        <span id="alert">{% trans "All clear ahead." %}</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="marq" aria-hidden="true">
+  <div>
+    <span>{% trans "HEAR THE ROAD" %} <b>&#10038;</b></span>
+    <span>{% trans "WALK FREE" %} <b>&#10038;</b></span>
+    <span>{% trans "NO GADGETS" %} <b>&#10038;</b></span>
+    <span>{% trans "WORKS OFFLINE" %} <b>&#10038;</b></span>
+    <span>{% trans "HINDI + ENGLISH" %} <b>&#10038;</b></span>
+    <span>{% trans "YOUR PHONE. YOUR PATH." %} <b>&#10038;</b></span>
+    <span>{% trans "HEAR THE ROAD" %} <b>&#10038;</b></span>
+    <span>{% trans "WALK FREE" %} <b>&#10038;</b></span>
+    <span>{% trans "NO GADGETS" %} <b>&#10038;</b></span>
+    <span>{% trans "WORKS OFFLINE" %} <b>&#10038;</b></span>
+    <span>{% trans "HINDI + ENGLISH" %} <b>&#10038;</b></span>
+    <span>{% trans "YOUR PHONE. YOUR PATH." %} <b>&#10038;</b></span>
+  </div>
+</div>
+
+<main id="main">
+  <!-- Features Section -->
+  <section id="features">
+    <div class="wrap">
+      <span class="eyebrow">{% trans "What it does" %}</span>
+      <h2 class="rv">{% trans "Small app." %} <em>{% trans "Big" %}</em> {% trans "awareness." %}</h2>
+      <div class="bento">
+        <article class="tile a rv">
+          <span class="n" aria-hidden="true">1</span>
+          <div>
+            <h3>{% trans "Sound from the right side" %}</h3>
+            <p>{% trans "A beep on the left means it's on your left. Higher pitch means closer." %}</p>
+          </div>
+        </article>
+        <article class="tile b rv">
+          <span class="n" aria-hidden="true">2</span>
+          <div>
+            <h3>{% trans "Runs on your phone" %}</h3>
+            <p>{% trans "The AI lives in the browser. No internet needed, and no video leaves your device." %}</p>
+          </div>
+        </article>
+        <article class="tile c rv">
+          <span class="n" aria-hidden="true">3</span>
+          <div>
+            <h3>{% trans "Only what matters" %}</h3>
+            <p>{% trans "A moving car beats a parked bike. Silence means clear." %}</p>
+          </div>
+        </article>
+        <article class="tile d rv">
+          <span class="n" aria-hidden="true">4</span>
+          <div>
+            <h3>{% trans "Hindi + English" %}</h3>
+            <p>{% trans 'Voice commands too. Just ask, "what\'s in front of me?"' %}</p>
+          </div>
+        </article>
+        <article class="tile e rv">
+          <span class="n" aria-hidden="true">5</span>
+          <div>
+            <h3>{% trans "Crossing helper" %}</h3>
+            <p>{% trans "Reads traffic lights: wait or go." %}</p>
+          </div>
+        </article>
+        <article class="tile f rv">
+          <div class="big" aria-hidden="true">0 &#8377;</div>
+          <div>
+            <h3>{% trans "Install in one tap" %}</h3>
+            <p>{% trans "Open the link, hit Add to Home Screen. Feels like any other app, and costs nothing." %}</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how">
+    <div class="wrap">
+      <span class="eyebrow">{% trans "How it works" %}</span>
+      <h2 class="rv">{% trans "Three steps." %} <em>{% trans "No setup." %}</em></h2>
+      <div class="steps">
+        <article class="step rv">
+          <span class="big" aria-hidden="true">01</span>
+          <h3>{% trans "See" %}</h3>
+          <p>{% trans "The camera streams live video and the AI reads every frame, many times a second." %}</p>
+        </article>
+        <article class="step rv">
+          <span class="big" aria-hidden="true">02</span>
+          <h3>{% trans "Think" %}</h3>
+          <p>{% trans "It works out direction and distance, then ranks what's most dangerous right now." %}</p>
+        </article>
+        <article class="step rv">
+          <span class="big" aria-hidden="true">03</span>
+          <h3>{% trans "Tell" %}</h3>
+          <p>{% trans "One short phrase, one beep from the right side, one vibration. That's it." %}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Impact & Stats Panel Section -->
+  <section id="impact">
+    <div class="wrap">
+      <div class="panel rv">
+        <h2>{% trans "Independence shouldn't" %} <em>{% trans "cost a fortune." %}</em></h2>
+        <div class="stats">
+          <div><b>0</b><span>{% trans "extra devices needed" %}</span></div>
+          <div><b>2</b><span>{% trans "languages at launch" %}</span></div>
+          <div><b>10</b><span>{% trans "looks per second" %}</span></div>
+          <div><b>100%</b><span>{% trans "stays on your phone" %}</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final Call to Action -->
+  <section class="final">
+    <div class="wrap">
+      <h2 class="rv">{% trans "Ready to walk" %} <em>{% trans "your way?" %}</em></h2>
+      <a class="btn pri rv" href="{% url 'navigate' %}">{% trans "Start walking" %} &rarr;</a>
+    </div>
+  </section>
+</main>
+
+<!-- Localized alert lines script data for JavaScript preview loop -->
+<script id="alert-lines-data" type="application/json">
+[
+  "{% trans 'All clear ahead.' %}",
+  "{% trans 'Person, ahead, 4 metres.' %}",
+  "{% trans 'Car coming, left, 6 metres.' %}",
+  "{% trans 'Stairs, right, 2 metres.' %}",
+  "{% trans 'Green light. You can cross.' %}"
+]
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/hero3d.js' %}"></script>
+<script src="{% static 'js/home.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,214 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Netra 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-05 12:00+0000\n"
+"PO-Revision-Date: 2026-10-05 12:00+0000\n"
+"Last-Translator: Netra Team\n"
+"Language-Team: Hindi\n"
+"Language: hi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Netra: your phone just got eyes"
+msgstr "नेत्र: आपके फ़ोन को मिली नई नज़र"
+
+msgid "Netra spots cars, people, stairs and obstacles through your camera, then tells you where they are with directional audio and speech."
+msgstr "नेत्र आपके कैमरे से गाड़ियाँ, लोग, सीढ़ियाँ और बाधाएँ पहचानता है और दिशात्मक ध्वनि व आवाज़ से बताता है।"
+
+msgid "Skip to content"
+msgstr "सामग्री पर जाएँ"
+
+msgid "Main"
+msgstr "मुख्य"
+
+msgid "Features"
+msgstr "सुविधाएँ"
+
+msgid "How"
+msgstr "कार्यप्रणाली"
+
+msgid "Impact"
+msgstr "प्रभाव"
+
+msgid "Language selection"
+msgstr "भाषा चयन"
+
+msgid "Switch to English"
+msgstr "अंग्रेज़ी में बदलें (Switch to English)"
+
+msgid "हिन्दी में बदलें"
+msgstr "हिन्दी में बदलें"
+
+msgid "Calm: on"
+msgstr "शांत मोड: चालू"
+
+msgid "Calm mode"
+msgstr "शांत मोड"
+
+msgid "Start"
+msgstr "शुरू करें"
+
+msgid "Netra is an assistive aid that complements a cane or guide dog. Distance estimates are approximate."
+msgstr "नेत्र एक सहायक साधन है जो सफ़ेद छड़ी या गाइड डॉग का पूरक है। दूरी के अनुमान लगभग हैं।"
+
+msgid "free"
+msgstr "मुफ़्त"
+
+msgid "offline"
+msgstr "ऑफ़लाइन"
+
+msgid "no extra gadgets"
+msgstr "बिना किसी अतिरिक्त उपकरण के"
+
+msgid "Your phone just got"
+msgstr "आपके फ़ोन को मिली"
+
+msgid "eyes."
+msgstr "नज़र।"
+
+msgid "Netra spots cars, people, stairs and potholes through your camera, then tells you where they are. Out loud, in Hindi or English, from the side they're on."
+msgstr "नेत्र आपके कैमरे से गाड़ियाँ, लोग, सीढ़ियाँ और गड्ढे पहचानता है, फिर बोलकर बताता है कि वे कहाँ हैं। हिन्दी या अंग्रेज़ी में, जिस दिशा में वे हैं।"
+
+msgid "Start walking"
+msgstr "चलना शुरू करें"
+
+msgid "Try the demo"
+msgstr "डेमो आज़माएँ"
+
+msgid "Netra says"
+msgstr "नेत्र कहता है"
+
+msgid "All clear ahead."
+msgstr "आगे रास्ता साफ़ है।"
+
+msgid "Person, ahead, 4 metres."
+msgstr "व्यक्ति, सामने, 4 मीटर।"
+
+msgid "Car coming, left, 6 metres."
+msgstr "गाड़ी आ रही है, बाईं ओर, 6 मीटर।"
+
+msgid "Stairs, right, 2 metres."
+msgstr "सीढ़ियाँ, दाईं ओर, 2 मीटर।"
+
+msgid "Green light. You can cross."
+msgstr "हरी बत्ती। आप पार कर सकते हैं।"
+
+msgid "HEAR THE ROAD"
+msgstr "सड़क को सुनें"
+
+msgid "WALK FREE"
+msgstr "आज़ादी से चलें"
+
+msgid "NO GADGETS"
+msgstr "कोई गैजेट नहीं"
+
+msgid "WORKS OFFLINE"
+msgstr "ऑफ़लाइन काम करता है"
+
+msgid "HINDI + ENGLISH"
+msgstr "हिन्दी + अंग्रेज़ी"
+
+msgid "YOUR PHONE. YOUR PATH."
+msgstr "आपका फ़ोन। आपका रास्ता।"
+
+msgid "What it does"
+msgstr "यह क्या करता है"
+
+msgid "Small app."
+msgstr "छोटा ऐप।"
+
+msgid "Big"
+msgstr "बड़ी"
+
+msgid "awareness."
+msgstr "जागरूकता।"
+
+msgid "Sound from the right side"
+msgstr "सही दिशा से आवाज़"
+
+msgid "A beep on the left means it's on your left. Higher pitch means closer."
+msgstr "बाईं ओर बीप का मतलब है वह आपके बाईं ओर है। तेज़ आवाज़ यानी ज़्यादा नज़दीक।"
+
+msgid "Runs on your phone"
+msgstr "आपके फ़ोन पर चलता है"
+
+msgid "The AI lives in the browser. No internet needed, and no video leaves your device."
+msgstr "एआई ब्राउज़र में काम करता है। इंटरनेट की ज़रूरत नहीं, और कोई वीडियो आपके फ़ोन से बाहर नहीं जाता।"
+
+msgid "Only what matters"
+msgstr "सिर्फ़ वही जो ज़रूरी है"
+
+msgid "A moving car beats a parked bike. Silence means clear."
+msgstr "चलती गाड़ी पार्क की गई बाइक से ज़्यादा ज़रूरी है। शांति यानी रास्ता साफ़।"
+
+msgid "Hindi + English"
+msgstr "हिन्दी + अंग्रेज़ी"
+
+msgid "Voice commands too. Just ask, \"what's in front of me?\""
+msgstr "आवाज़ से निर्देश भी। बस पूछें, \"मेरे सामने क्या है?\""
+
+msgid "Crossing helper"
+msgstr "सड़क पार करने में मददगार"
+
+msgid "Reads traffic lights: wait or go."
+msgstr "ट्रैफ़िक लाइट पढ़ता है: रुकें या चलें।"
+
+msgid "Install in one tap"
+msgstr "एक टैप में इंस्टॉल करें"
+
+msgid "Open the link, hit Add to Home Screen. Feels like any other app, and costs nothing."
+msgstr "लिंक खोलें, 'होम स्क्रीन में जोड़ें' पर टैप करें। सामान्य ऐप जैसा, पूरी तरह मुफ़्त।"
+
+msgid "How it works"
+msgstr "यह कैसे काम करता है"
+
+msgid "Three steps."
+msgstr "तीन चरण।"
+
+msgid "No setup."
+msgstr "कोई झंझट नहीं।"
+
+msgid "See"
+msgstr "देखें"
+
+msgid "The camera streams live video and the AI reads every frame, many times a second."
+msgstr "कैमरा लाइव वीडियो देखता है और एआई हर सेकंड कई बार हर फ़्रेम को पढ़ता है।"
+
+msgid "Think"
+msgstr "समझें"
+
+msgid "It works out direction and distance, then ranks what's most dangerous right now."
+msgstr "यह दिशा और दूरी तय करता है, फिर तय करता है कि इस समय सबसे बड़ा ख़तरा क्या है।"
+
+msgid "Tell"
+msgstr "बताएँ"
+
+msgid "One short phrase, one beep from the right side, one vibration. That's it."
+msgstr "एक छोटा वाक्य, सही दिशा से एक बीप, एक कंपन। बस इतना ही।"
+
+msgid "Independence shouldn't"
+msgstr "आत्मनिर्भरता के लिए"
+
+msgid "cost a fortune."
+msgstr "कीमत नहीं चुकानी चाहिए।"
+
+msgid "extra devices needed"
+msgstr "अतिरिक्त उपकरण की ज़रूरत"
+
+msgid "languages at launch"
+msgstr "भाषाएँ शुरुआत में"
+
+msgid "looks per second"
+msgstr "नज़रें प्रति सेकंड"
+
+msgid "stays on your phone"
+msgstr "डेटा आपके फ़ोन पर रहता है"
+
+msgid "Ready to walk"
+msgstr "चलने के लिए तैयार"
+
+msgid "your way?"
+msgstr "अपनी मर्ज़ी से?"

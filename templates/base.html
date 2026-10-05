@@ -1,0 +1,99 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}{% trans "Netra: your phone just got eyes" %}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{% trans 'Netra spots cars, people, stairs and potholes through your camera, then tells you where they are. Out loud, in Hindi or English, from the side they\'re on.' %}{% endblock %}">
+  <meta name="theme-color" content="#f5efe6">
+
+  <!-- PWA Manifest & App Icons -->
+  <link rel="manifest" href="{% url 'manifest_root' %}">
+  <link rel="icon" type="image/svg+xml" href="{% static 'icons/icon.svg' %}">
+  <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
+
+  <!-- Web Typography: Bricolage Grotesque (headings) & Atkinson Hyperlegible (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+
+  <!-- Netra Design System (All tokens and styles in netra.css) -->
+  <link rel="stylesheet" href="{% static 'css/netra.css' %}?v=20261005_6">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <!-- WCAG AAA Skip to content link -->
+  <a class="skip" href="#main">{% trans "Skip to content" %}</a>
+
+  <!-- Floating Pill Nav -->
+  <nav aria-label="{% trans 'Main' %}">
+    <a class="brand" href="{% if request.path == '/' %}#top{% else %}/{% endif %}">netra<span>.</span></a>
+    
+    <!-- Desktop Section Links (Hidden on screens <= 992px) -->
+    <div class="nav-links">
+      <a class="l" href="{% url 'demo' %}">{% trans "Demo" %}</a>
+      <a class="l" href="{% url 'navigate' %}">{% trans "Navigate" %}</a>
+      <a class="l" href="{% url 'settings' %}">{% trans "Settings" %}</a>
+      <a class="l nav-extra" href="{% if request.path == '/' %}#features{% else %}/#features{% endif %}">{% trans "Features" %}</a>
+      <a class="l nav-extra" href="{% if request.path == '/' %}#how{% else %}/#how{% endif %}">{% trans "How" %}</a>
+      <a class="l nav-extra" href="{% if request.path == '/' %}#impact{% else %}/#impact{% endif %}">{% trans "Impact" %}</a>
+    </div>
+
+    <!-- Bilingual i18n Language Switcher -->
+    <form action="{% url 'set_language' %}" method="post" class="lang-switcher" aria-label="{% trans 'Language selection' %}">
+      {% csrf_token %}
+      <input name="next" type="hidden" value="{{ request.get_full_path }}">
+      {% get_current_language as CURRENT_LANG %}
+      <button type="submit" name="language" value="en" class="lang-btn {% if CURRENT_LANG == 'en' %}active{% endif %}" aria-pressed="{% if CURRENT_LANG == 'en' %}true{% else %}false{% endif %}" title="{% trans 'Switch to English' %}">EN</button>
+      <button type="submit" name="language" value="hi" class="lang-btn {% if CURRENT_LANG == 'hi' %}active{% endif %}" aria-pressed="{% if CURRENT_LANG == 'hi' %}true{% else %}false{% endif %}" title="{% trans 'हिन्दी में बदलें' %}">हिन्दी</button>
+    </form>
+
+    <div class="nav-actions">
+      <button class="chip calm" id="perf" aria-pressed="false" data-calm-on="{% trans 'Calm: on' %}" data-calm-mode="{% trans 'Calm mode' %}">{% trans "Calm mode" %}</button>
+      {% if request.user.is_authenticated %}
+        <a class="chip user-badge-chip" href="{% url 'user-profile' %}" style="background: var(--lilac); color: var(--ink); font-weight: 800; border: 2px solid var(--ink);" title="{% trans 'Logged in as' %} {{ request.user.username }}">👤 {{ request.user.username }}</a>
+        {% if request.user.is_staff or request.user.is_superuser %}
+        <a class="chip nav-admin-chip" href="/admin/" style="background: var(--lime); color: var(--ink); font-weight: 800; border: 2px solid var(--ink);" title="{% trans 'Django Administration Panel' %}">⚙️ {% trans "Admin" %}</a>
+        {% endif %}
+        <a class="chip nav-logout-chip" href="{% url 'user-logout' %}" style="background: var(--peach); color: var(--ink);" title="{% trans 'Sign out' %}">{% trans "Log Out" %}</a>
+      {% else %}
+        <a class="chip" href="{% url 'user-login' %}" style="background: #fff; color: var(--ink); border: 1.5px solid var(--ink);">{% trans "Log In" %}</a>
+      {% endif %}
+      <a class="chip nav-start-chip" href="{% url 'navigate' %}">{% trans "Start" %}</a>
+    </div>
+  </nav>
+
+  {% block content %}{% endblock %}
+
+  <footer>
+    <div class="wrap">
+      {% trans "Netra is an assistive aid that complements a cane or guide dog. Distance estimates are approximate." %}
+    </div>
+  </footer>
+
+  <!-- Local Vendor Three.js (r128) -->
+  <script src="{% static 'vendor/three.min.js' %}"></script>
+  <!-- Global Assistive Spatial Audio & Speech Synthesizer -->
+  <script src="{% static 'js/audio.js' %}"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js?v=20261005_6', { scope: '/' })
+          .then(function(reg) {
+            if (reg && reg.update) {
+              reg.update();
+            }
+          })
+          .catch(function(err) {
+            console.warn('[Netra] Service worker registration error:', err);
+          });
+      });
+    }
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

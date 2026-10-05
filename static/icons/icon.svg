@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Netra App Icon - Violet and Lime Assistive Vision Palette -->
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="12" dy="12" stdDeviation="0" flood-color="#15121f" flood-opacity="1" />
+    </filter>
+  </defs>
+
+  <!-- Cream Canvas / Background Tile with 2px Ink Border & Hard Shadow -->
+  <rect x="24" y="24" width="464" height="464" rx="100" fill="#f5efe6" stroke="#15121f" stroke-width="12" />
+
+  <!-- Echolocation / Radar Wave Rings (Violet) -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#5b3df5" stroke-width="10" stroke-dasharray="14 14" opacity="0.35" />
+  <circle cx="256" cy="256" r="130" fill="none" stroke="#5b3df5" stroke-width="12" opacity="0.75" />
+
+  <!-- Netra Stylized Vision Eye (Ink & Violet) -->
+  <path d="M 96 256 Q 256 120 416 256 Q 256 392 96 256 Z" fill="#ffffff" stroke="#15121f" stroke-width="16" stroke-linejoin="round" />
+
+  <!-- Electric Violet Iris -->
+  <circle cx="256" cy="256" r="68" fill="#5b3df5" stroke="#15121f" stroke-width="12" />
+
+  <!-- Lime Pupil / AI Pulse Core -->
+  <circle cx="256" cy="256" r="32" fill="#d4f55a" stroke="#15121f" stroke-width="8" />
+  <circle cx="270" cy="242" r="9" fill="#ffffff" />
+
+  <!-- Top Directional Audio Soundwaves (Lime & Violet) -->
+  <path d="M 216 92 A 52 52 0 0 1 296 92" fill="none" stroke="#d4f55a" stroke-width="14" stroke-linecap="round" />
+  <path d="M 180 58 A 96 96 0 0 1 332 58" fill="none" stroke="#5b3df5" stroke-width="14" stroke-linecap="round" />
+</svg>

@@ -1,0 +1,42 @@
+# ==============================================================================
+# Netra Backend Requirements
+# Python 3.11+
+# ==============================================================================
+
+# Core Django & REST Framework
+Django>=5.0,<5.2
+djangorestframework>=3.14.0
+drf-spectacular>=0.27.0
+django-filter>=23.5
+djangorestframework-simplejwt>=5.3.0
+django-cors-headers>=4.3.0
+
+# Asynchronous Channels & Daphne ASGI Server
+daphne>=4.1.0
+channels>=4.1.0
+channels-redis>=4.2.0
+
+# Celery Background Tasks & Redis Broker
+redis>=5.0.0
+celery>=5.3.6
+
+# Production Storage, Server & Database
+whitenoise>=6.6.0
+psycopg2-binary>=2.9.9
+
+# Environment Configuration
+python-dotenv>=1.0.1
+
+# Computer Vision, Image Handling & OCR
+pillow>=10.2.0
+numpy>=1.26.0
+opencv-python-headless>=4.9.0.80
+ultralytics>=8.1.0
+easyocr>=1.7.1
+pytesseract>=0.3.10
+
+# Testing Suite
+pytest>=8.0.0
+pytest-django>=4.8.0
+pytest-asyncio>=0.23.0
+factory-boy>=3.3.0

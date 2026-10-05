@@ -1,0 +1,114 @@
+# ==============================================================================
+# Netra AI - Professional .gitignore
+# Production-ready exclusion rules for Django, PyTorch/YOLO, Celery, IDEs & OS
+# ==============================================================================
+
+# Python bytecode & compiled binaries
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django local databases & runtime logs
+*.log
+logs/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+db.sqlite3-shm
+db.sqlite3-wal
+
+# Static and Media uploads (preserve folder structure via .gitkeep)
+staticfiles/*
+!staticfiles/.gitkeep
+media/*
+!media/.gitkeep
+media/models/*
+!media/models/.gitkeep
+media/reports/*
+!media/reports/.gitkeep
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+
+# Machine Learning weights, runs, and cache (models managed via ModelHub / release assets)
+yolov8*.pt
+*.onnx
+*.tflite
+*.engine
+runs/
+wandb/
+.cache/
+torch/
+
+# Celery & background scheduler
+celerybeat-schedule
+celerybeat-schedule.db
+celerybeat.pid
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+*.bak
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Scratch and internal AI logs
+scratch/
+.system_generated/

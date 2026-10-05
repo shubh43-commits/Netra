@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Netra: Create Account" %} &middot; Netra{% endblock %}
+
+{% block content %}
+<main id="main" class="wrap page-hero" style="padding-top: 100px; max-width: 540px; margin: 0 auto;">
+  <span class="sticker" style="margin-bottom: 20px;">{% trans "join netra" %} &middot; {% trans "100% free" %}</span>
+  <h1>{% trans "Create your" %} <mark>{% trans "account." %}</mark></h1>
+  <p class="lead">{% trans "Save your settings, sync your custom emergency contacts, and walk with confidence." %}</p>
+
+  <div class="page-card" style="margin-top: 20px; padding: clamp(24px, 5vw, 40px);">
+    {% if error %}
+    <div style="background: #ffd9b8; border: 2px solid var(--ink); border-radius: 14px; padding: 12px 16px; margin-bottom: 20px; font-weight: 700; color: #b71c1c;">
+      ⚠ {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'user-signup' %}" style="display: flex; flex-direction: column; gap: 16px;">
+      {% csrf_token %}
+
+      <div>
+        <label for="username" style="display: block; font-weight: 700; margin-bottom: 6px; font-size: 1.05rem;">
+          {% trans "Choose a Username" %} *
+        </label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          required
+          autocapitalize="none"
+          autocomplete="username"
+          placeholder="{% trans 'e.g. rahul_walks' %}"
+          style="width: 100%; min-height: 56px; padding: 12px 16px; border-radius: 14px; border: 2px solid var(--ink); font-size: 1.1rem; background: #fff;"
+        >
+      </div>
+
+      <div>
+        <label for="email" style="display: block; font-weight: 700; margin-bottom: 6px; font-size: 1.05rem;">
+          {% trans "Email Address (Optional)" %}
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          autocomplete="email"
+          placeholder="{% trans 'name@example.com' %}"
+          style="width: 100%; min-height: 56px; padding: 12px 16px; border-radius: 14px; border: 2px solid var(--ink); font-size: 1.1rem; background: #fff;"
+        >
+      </div>
+
+      <div>
+        <label for="password" style="display: block; font-weight: 700; margin-bottom: 6px; font-size: 1.05rem;">
+          {% trans "Password (minimum 8 characters)" %} *
+        </label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          minlength="8"
+          autocomplete="new-password"
+          placeholder="{% trans 'Create a strong password' %}"
+          style="width: 100%; min-height: 56px; padding: 12px 16px; border-radius: 14px; border: 2px solid var(--ink); font-size: 1.1rem; background: #fff;"
+        >
+      </div>
+
+      <div>
+        <label for="password_confirm" style="display: block; font-weight: 700; margin-bottom: 6px; font-size: 1.05rem;">
+          {% trans "Confirm Password" %} *
+        </label>
+        <input
+          type="password"
+          id="password_confirm"
+          name="password_confirm"
+          required
+          minlength="8"
+          autocomplete="new-password"
+          placeholder="{% trans 'Re-enter your password' %}"
+          style="width: 100%; min-height: 56px; padding: 12px 16px; border-radius: 14px; border: 2px solid var(--ink); font-size: 1.1rem; background: #fff;"
+        >
+      </div>
+
+      <!-- Device Merge Notice -->
+      <div style="background: var(--lime); border: 1.5px solid var(--ink); border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; color: var(--ink);">
+        ✓ {% trans "Your current device preferences and emergency contacts will be seamlessly linked to your new account." %}
+      </div>
+
+      <button
+        type="submit"
+        class="btn pri"
+        style="min-height: 64px; font-size: 1.15rem; width: 100%; margin-top: 6px;"
+      >
+        {% trans "Create Free Account" %} &rarr;
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(21,18,31,0.12); font-size: 0.98rem;">
+      {% trans "Already have an account?" %}
+      <a href="{% url 'user-login' %}" style="font-weight: 700; color: var(--vio); text-decoration: underline; margin-left: 4px;">
+        {% trans "Log in here" %}
+      </a>
+    </div>
+  </div>
+</main>
+{% endblock %}

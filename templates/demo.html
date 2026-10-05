@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Netra: Interactive Street Simulator" %} &middot; Netra{% endblock %}
+
+{% block content %}
+<main id="main" class="wrap page-hero" style="padding-top: 100px;">
+  <span class="sticker" style="margin-bottom: 20px;">{% trans "interactive demo" %} &middot; {% trans "no webcam needed" %}</span>
+  <h1>{% trans "Simulated" %} <mark>{% trans "Street." %}</mark></h1>
+  <p class="lead">{% trans "Experience spatial beeps, spoken announcements, and real-time hazard ranking directly in your browser. Plug in earphones to test 3D directional stereo panning." %}</p>
+
+  <!-- Live Speech-Bubble Alert Feedback -->
+  <div class="bubble" role="status" aria-live="polite" style="margin-bottom: 24px; max-width: 640px;">
+    <span class="pulse" aria-hidden="true"></span>
+    <div>
+      <small>{% trans "Netra voice announcement" %}</small>
+      <span id="demoAlert" style="font-weight: 700; color: var(--ink);">{% trans "Ready. Press 'Start Walking Simulator' or select an obstacle below." %}</span>
+    </div>
+  </div>
+
+  <!-- Primary Interactive Simulator Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 32px;">
+    
+    <!-- Left: Simulated Street Viewport Canvas -->
+    <div class="page-card" style="margin-top: 0; padding: 20px; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="font-size: 1.2rem; margin: 0;">{% trans "Street Viewport" %}</h3>
+        <span id="statFps" class="chip" style="font-size: 0.85rem; padding: 4px 12px;">60 FPS</span>
+      </div>
+
+      <div style="position: relative; width: 100%; height: 320px; border-radius: 18px; overflow: hidden; border: 2px solid var(--ink); background: #39334a;">
+        <canvas id="streetCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+      </div>
+
+      <!-- Play / Pause Simulator Pill -->
+      <div style="display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;">
+        <button id="simToggle" class="btn pri" style="flex: 1; min-height: 54px; font-size: 1rem;">
+          ▶ {% trans "Start Walking Simulator" %}
+        </button>
+        <button id="describeBtn" class="btn sec" style="min-height: 54px; font-size: 1rem;">
+          🎙️ {% trans "Describe Scene" %}
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Top-Down Spatial Radar & Audio Controls -->
+    <div class="page-card" style="margin-top: 0; padding: 20px; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="font-size: 1.2rem; margin: 0;">{% trans "Spatial Radar (Top-Down)" %}</h3>
+        <div style="display: flex; gap: 6px;">
+          <span class="chip" style="font-size: 0.85rem; padding: 4px 10px;">
+            Hazards: <b id="statHazards">2</b>
+          </span>
+          <span class="chip" style="font-size: 0.85rem; padding: 4px 10px;">
+            Nearest: <b id="statDistance">4.5m</b>
+          </span>
+        </div>
+      </div>
+
+      <div style="position: relative; width: 100%; height: 260px; border-radius: 18px; border: 2px solid var(--ink); background: #fdfaf5; display: flex; align-items: center; justify-content: center;">
+        <canvas id="radarCanvas" style="width: 100%; height: 100%;"></canvas>
+      </div>
+
+      <!-- Audio Engine Controls -->
+      <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+        <button id="soundToggle" class="chip" style="cursor: pointer; font-weight: 700;" aria-pressed="true">
+          🔊 {% trans "Sound: ON" %}
+        </button>
+        <button id="simLang" class="chip" style="cursor: pointer; font-weight: 700;">
+          🌐 {% trans "Language: English" %}
+        </button>
+      </div>
+
+      <!-- Directional Panning Quick Test -->
+      <div style="margin-top: 14px; font-size: 0.88rem; color: var(--mute);">
+        <b>{% trans "Test Directional Stereo Beeps:" %}</b>
+        <div style="display: flex; gap: 8px; margin-top: 6px;">
+          <button class="chip" data-test-beep="left" style="cursor: pointer;">◂ {% trans "Left Ear" %}</button>
+          <button class="chip" data-test-beep="ahead" style="cursor: pointer;">▲ {% trans "Center" %}</button>
+          <button class="chip" data-test-beep="right" style="cursor: pointer;">{% trans "Right Ear" %} ▸</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Obstacle Injection Triggers (Bento Tiles) -->
+  <section style="margin-bottom: 40px;">
+    <h2 style="font-size: 1.8rem; margin-bottom: 16px;">{% trans "Instant Hazard Triggers" %}</h2>
+    <p style="color: var(--mute); margin-bottom: 20px;">{% trans "Click any scenario button to simulate an obstacle appearing in your walking path and hear how Netra responds instantly:" %}</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+      <button data-spawn="person" class="tile a" style="border: 2px solid var(--ink); text-align: left; cursor: pointer; padding: 20px; border-radius: 20px; transition: transform 0.2s; box-shadow: 4px 4px 0 var(--ink);">
+        <span class="n" style="background: var(--sky);">🚶</span>
+        <h3 style="margin: 10px 0 4px; font-size: 1.15rem;">{% trans "Pedestrian Ahead" %}</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: var(--mute);">{% trans "Approaching person at 3m" %}</p>
+      </button>
+
+      <button data-spawn="car" class="tile b" style="border: 2px solid var(--ink); text-align: left; cursor: pointer; padding: 20px; border-radius: 20px; transition: transform 0.2s; box-shadow: 4px 4px 0 var(--ink);">
+        <span class="n" style="background: var(--pink);">🚗</span>
+        <h3 style="margin: 10px 0 4px; font-size: 1.15rem;">{% trans "Speeding Car" %}</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: var(--mute);">{% trans "Vehicle on left approaching at 5m" %}</p>
+      </button>
+
+      <button data-spawn="stairs" class="tile c" style="border: 2px solid var(--ink); text-align: left; cursor: pointer; padding: 20px; border-radius: 20px; transition: transform 0.2s; box-shadow: 4px 4px 0 var(--ink);">
+        <span class="n" style="background: var(--peach);">🪜</span>
+        <h3 style="margin: 10px 0 4px; font-size: 1.15rem;">{% trans "Stairs / Drop-off" %}</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: var(--mute);">{% trans "Stairs on right at 2m" %}</p>
+      </button>
+
+      <button data-spawn="light" class="tile e" style="border: 2px solid var(--ink); text-align: left; cursor: pointer; padding: 20px; border-radius: 20px; transition: transform 0.2s; box-shadow: 4px 4px 0 var(--ink);">
+        <span class="n" style="background: var(--lime);">🚦</span>
+        <h3 style="margin: 10px 0 4px; font-size: 1.15rem;">{% trans "Toggle Traffic Light" %}</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: var(--mute);">{% trans "Switch Red (Stop) / Green (Go)" %}</p>
+      </button>
+    </div>
+  </section>
+
+  <!-- Navigation Action Links -->
+  <div class="cta" style="margin: 0 0 60px;">
+    <a class="btn pri" href="{% url 'navigate' %}">{% trans "Switch to Live Camera Navigation" %} &rarr;</a>
+    <a class="btn sec" href="{% url 'home' %}">&larr; {% trans "Back to Home" %}</a>
+  </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/audio.js' %}"></script>
+<script src="{% static 'js/radar.js' %}"></script>
+<script src="{% static 'js/demo.js' %}"></script>
+{% endblock %}

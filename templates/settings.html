@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Netra: Settings & Accessibility" %} &middot; Netra{% endblock %}
+
+{% block content %}
+<main id="main" class="wrap page-hero" style="padding-top: 100px;">
+  <span class="sticker" style="margin-bottom: 20px;">{% trans "preferences" %} &middot; {% trans "accessibility" %}</span>
+  <h1>{% trans "App" %} <mark>{% trans "Settings." %}</mark></h1>
+  <p class="lead">{% trans "Customize voice speech rate, directional beep volumes, warning distance thresholds, and emergency contacts. Changes save instantly to your phone." %}</p>
+
+  <!-- Settings Bento Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 24px; margin-bottom: 36px;">
+
+    <!-- Tile 1: Speech & Language -->
+    <div class="tile a" style="border: 2px solid var(--ink); border-radius: var(--r); padding: 24px; box-shadow: 6px 6px 0 var(--ink); background: #fff;">
+      <h3 style="font-size: 1.3rem; margin: 0 0 14px;">🗣️ {% trans "Speech & Voice" %}</h3>
+      
+      <label style="display: block; font-weight: 700; margin-bottom: 8px;">{% trans "Announcement Language" %}</label>
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button id="setLangEn" class="chip" style="cursor: pointer; font-weight: 700; flex: 1; min-height: 44px;">English (en-IN)</button>
+        <button id="setLangHi" class="chip" style="cursor: pointer; font-weight: 700; flex: 1; min-height: 44px;">हिन्दी (hi-IN)</button>
+      </div>
+
+      <label for="speechRate" style="display: block; font-weight: 700; margin-bottom: 6px;">
+        {% trans "Speech Speed:" %} <span id="speechRateVal">1.0x</span>
+      </label>
+      <input type="range" id="speechRate" min="0.7" max="1.5" step="0.1" value="1.0" style="width: 100%; accent-color: var(--vio); height: 28px; cursor: pointer;">
+      <small style="color: var(--mute); display: block; margin-top: 4px;">{% trans "Controls how fast obstacle warnings are read aloud." %}</small>
+    </div>
+
+    <!-- Tile 2: Spatial Beeps & Audio Volume -->
+    <div class="tile b" style="border: 2px solid var(--ink); border-radius: var(--r); padding: 24px; box-shadow: 6px 6px 0 var(--ink); background: #fff;">
+      <h3 style="font-size: 1.3rem; margin: 0 0 14px;">🎧 {% trans "Audio & Spatial Beeps" %}</h3>
+
+      <label for="masterVol" style="display: block; font-weight: 700; margin-bottom: 6px;">
+        {% trans "Master Volume:" %} <span id="masterVolVal">80%</span>
+      </label>
+      <input type="range" id="masterVol" min="0" max="1" step="0.05" value="0.8" style="width: 100%; accent-color: var(--vio); height: 28px; cursor: pointer; margin-bottom: 16px;">
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div>
+          <b>{% trans "Directional Stereo Beeps" %}</b>
+          <div style="font-size: 0.88rem; color: var(--mute);">{% trans "Plays beeps in left/right ear according to obstacle position" %}</div>
+        </div>
+        <input type="checkbox" id="spatialToggle" checked style="width: 24px; height: 24px; accent-color: var(--vio); cursor: pointer;">
+      </div>
+
+      <button id="testAudioBtn" class="chip" style="cursor: pointer; font-weight: 700; width: 100%; min-height: 44px; background: var(--lilac);">
+        🔊 {% trans "Test Sound & Speech" %}
+      </button>
+    </div>
+
+    <!-- Tile 3: Proximity Threshold & Haptics -->
+    <div class="tile c" style="border: 2px solid var(--ink); border-radius: var(--r); padding: 24px; box-shadow: 6px 6px 0 var(--ink); background: #fff;">
+      <h3 style="font-size: 1.3rem; margin: 0 0 14px;">⚠️ {% trans "Alert Sensitivity & Haptics" %}</h3>
+
+      <label for="alertDistance" style="display: block; font-weight: 700; margin-bottom: 6px;">
+        {% trans "Warning Range Threshold:" %} <span id="distVal">5.0m</span>
+      </label>
+      <input type="range" id="alertDistance" min="2.0" max="8.0" step="0.5" value="5.0" style="width: 100%; accent-color: var(--vio); height: 28px; cursor: pointer; margin-bottom: 16px;">
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div>
+          <b>{% trans "Haptic Vibration" %}</b>
+          <div style="font-size: 0.88rem; color: var(--mute);">{% trans "Vibrates phone for close or approaching objects" %}</div>
+        </div>
+        <input type="checkbox" id="vibrationToggle" checked style="width: 24px; height: 24px; accent-color: var(--vio); cursor: pointer;">
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <b>{% trans "Calm Mode" %}</b>
+          <div style="font-size: 0.88rem; color: var(--mute);">{% trans "Freezes decorative animations for minimal distraction" %}</div>
+        </div>
+        <input type="checkbox" id="calmToggle" style="width: 24px; height: 24px; accent-color: var(--vio); cursor: pointer;">
+      </div>
+    </div>
+
+    <!-- Tile 4: Emergency Contacts & Cloud Sync -->
+    <div class="tile d" style="border: 2px solid var(--ink); border-radius: var(--r); padding: 24px; box-shadow: 6px 6px 0 var(--ink); background: #fff;">
+      <h3 style="font-size: 1.3rem; margin: 0 0 14px;">🆘 {% trans "Emergency Contact" %}</h3>
+      <p style="font-size: 0.9rem; color: var(--mute); margin-bottom: 14px;">
+        {% trans "Add a trusted contact to receive instant alert SMS/WhatsApp in case of a fall or danger incident." %}
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px;">
+        <input type="text" id="contactName" placeholder="{% trans 'Contact Name (e.g. Papa, Sister)' %}" style="padding: 10px 14px; border-radius: 12px; border: 2px solid var(--ink); font-size: 1rem;">
+        <input type="tel" id="contactPhone" placeholder="{% trans 'Phone with country code (e.g. +919876543210)' %}" style="padding: 10px 14px; border-radius: 12px; border: 2px solid var(--ink); font-size: 1rem;">
+        <button id="saveContactBtn" class="chip" style="cursor: pointer; font-weight: 700; min-height: 44px; background: var(--lime); color: var(--ink);">
+          + {% trans "Save Contact" %}
+        </button>
+      </div>
+
+      <div id="contactStatus" style="font-size: 0.88rem; font-weight: 700; color: var(--vio);"></div>
+    </div>
+  </div>
+
+  <!-- Action CTAs -->
+  <div class="cta" style="margin: 0 0 60px;">
+    <a class="btn pri" href="{% url 'navigate' %}">{% trans "Go to Live Navigation" %} &rarr;</a>
+    <a class="btn sec" href="{% url 'demo' %}">{% trans "Try Street Simulator" %}</a>
+    <a class="btn sec" href="{% url 'home' %}">&larr; {% trans "Back to Home" %}</a>
+  </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/audio.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const langEnBtn = document.getElementById('setLangEn');
+  const langHiBtn = document.getElementById('setLangHi');
+  const rateSlider = document.getElementById('speechRate');
+  const rateVal = document.getElementById('speechRateVal');
+  const volSlider = document.getElementById('masterVol');
+  const volVal = document.getElementById('masterVolVal');
+  const spatialToggle = document.getElementById('spatialToggle');
+  const vibrationToggle = document.getElementById('vibrationToggle');
+  const calmToggle = document.getElementById('calmToggle');
+  const distSlider = document.getElementById('alertDistance');
+  const distVal = document.getElementById('distVal');
+  const testBtn = document.getElementById('testAudioBtn');
+
+  const contactName = document.getElementById('contactName');
+  const contactPhone = document.getElementById('contactPhone');
+  const saveContactBtn = document.getElementById('saveContactBtn');
+  const contactStatus = document.getElementById('contactStatus');
+
+  const deviceId = localStorage.getItem('netra_device_id') || 'dev_' + Math.random().toString(36).substring(2, 10);
+  localStorage.setItem('netra_device_id', deviceId);
+
+  // Load saved preferences
+  const currentLang = localStorage.getItem('netra_lang') || 'en';
+  updateLangButtons(currentLang);
+
+  if (rateSlider) {
+    rateSlider.value = localStorage.getItem('netra_speech_rate') || '1.0';
+    rateVal.textContent = `${rateSlider.value}x`;
+    rateSlider.addEventListener('input', () => {
+      rateVal.textContent = `${rateSlider.value}x`;
+      localStorage.setItem('netra_speech_rate', rateSlider.value);
+      window.netraAudio.speechRate = parseFloat(rateSlider.value);
+    });
+  }
+
+  if (volSlider) {
+    volSlider.value = localStorage.getItem('netra_volume') || '0.8';
+    volVal.textContent = `${Math.round(volSlider.value * 100)}%`;
+    volSlider.addEventListener('input', () => {
+      volVal.textContent = `${Math.round(volSlider.value * 100)}%`;
+      localStorage.setItem('netra_volume', volSlider.value);
+      window.netraAudio.volume = parseFloat(volSlider.value);
+    });
+  }
+
+  if (spatialToggle) {
+    spatialToggle.checked = localStorage.getItem('netra_beeps') !== 'false';
+    spatialToggle.addEventListener('change', () => {
+      localStorage.setItem('netra_beeps', spatialToggle.checked.toString());
+      window.netraAudio.spatialBeepsEnabled = spatialToggle.checked;
+    });
+  }
+
+  if (vibrationToggle) {
+    vibrationToggle.checked = localStorage.getItem('netra_vibration') !== 'false';
+    vibrationToggle.addEventListener('change', () => {
+      localStorage.setItem('netra_vibration', vibrationToggle.checked.toString());
+      window.netraAudio.vibrationEnabled = vibrationToggle.checked;
+    });
+  }
+
+  if (distSlider) {
+    distSlider.value = localStorage.getItem('netra_dist') || '5.0';
+    distVal.textContent = `${distSlider.value}m`;
+    distSlider.addEventListener('input', () => {
+      distVal.textContent = `${distSlider.value}m`;
+      localStorage.setItem('netra_dist', distSlider.value);
+    });
+  }
+
+  function updateLangButtons(lang) {
+    if (lang === 'hi') {
+      langHiBtn.style.background = 'var(--ink)';
+      langHiBtn.style.color = '#fff';
+      langEnBtn.style.background = '#fff';
+      langEnBtn.style.color = 'var(--ink)';
+    } else {
+      langEnBtn.style.background = 'var(--ink)';
+      langEnBtn.style.color = '#fff';
+      langHiBtn.style.background = '#fff';
+      langHiBtn.style.color = 'var(--ink)';
+    }
+  }
+
+  langEnBtn.addEventListener('click', () => {
+    window.netraAudio.setLanguage('en');
+    updateLangButtons('en');
+    window.netraAudio.speak('English voice selected.', true);
+  });
+
+  langHiBtn.addEventListener('click', () => {
+    window.netraAudio.setLanguage('hi');
+    updateLangButtons('hi');
+    window.netraAudio.speak('हिन्दी आवाज़ चुनी गई है।', true);
+  });
+
+  testBtn.addEventListener('click', () => {
+    window.netraAudio.unlock();
+    window.netraAudio.playProximityBeep('left', 2.5);
+    setTimeout(() => {
+      window.netraAudio.playProximityBeep('right', 1.5);
+    }, 250);
+    setTimeout(() => {
+      window.netraAudio.speak(
+        window.netraAudio.language === 'hi' ? 'नेत्र ध्वनि परीक्षण सफल रहा।' : 'Netra sound test complete.',
+        true
+      );
+    }, 550);
+  });
+
+  // Emergency contact save via API
+  saveContactBtn.addEventListener('click', async () => {
+    const name = contactName.value.trim();
+    const phone = contactPhone.value.trim();
+    if (!name || !phone) {
+      contactStatus.textContent = 'Please enter both name and phone number.';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/contacts/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Device-ID': deviceId
+        },
+        body: JSON.stringify({ name, phone_number: phone, relationship: 'family' })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        contactStatus.textContent = '✓ Emergency contact saved!';
+        contactName.value = '';
+        contactPhone.value = '';
+      } else {
+        contactStatus.textContent = data.message || 'Could not save contact. Verify phone format (+91...).';
+      }
+    } catch (e) {
+      contactStatus.textContent = 'Saved to device storage!';
+      localStorage.setItem('netra_contact_name', name);
+      localStorage.setItem('netra_contact_phone', phone);
+    }
+  });
+});
+</script>
+{% endblock %}

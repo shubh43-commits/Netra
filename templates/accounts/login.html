@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Netra: Log In" %} &middot; Netra{% endblock %}
+
+{% block content %}
+<main id="main" class="wrap page-hero" style="padding-top: 100px; max-width: 540px; margin: 0 auto;">
+  <span class="sticker" style="margin-bottom: 20px;">{% trans "account access" %} &middot; {% trans "device sync" %}</span>
+  <h1>{% trans "Welcome" %} <mark>{% trans "back." %}</mark></h1>
+  <p class="lead">{% trans "Log in to sync your saved preferences, emergency contacts, and assistive settings across all your phones." %}</p>
+
+  {% if request.user.is_authenticated %}
+  <!-- Active User Profile Status Card -->
+  <div class="page-card" style="margin-top: 20px; padding: clamp(24px, 5vw, 40px); background: #fff; border: 2.5px solid var(--ink); border-radius: 24px; box-shadow: 6px 6px 0 var(--ink);">
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+      <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--vio); color: #fff; font-size: 1.8rem; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink);">
+        {{ request.user.username|slice:":1"|upper }}
+      </div>
+      <div>
+        <div style="font-weight: 800; font-size: 1.35rem; color: var(--ink); line-height: 1.2;">
+          {{ request.user.username }}
+        </div>
+        <div style="font-size: 0.95rem; color: var(--mute); word-break: break-all;">
+          {{ request.user.email|default:"No email registered" }}
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      {% if request.user.is_staff or request.user.is_superuser %}
+      <span style="background: var(--lime); color: var(--ink); font-weight: 800; font-size: 0.9rem; padding: 6px 14px; border-radius: 99px; border: 1.5px solid var(--ink); display: inline-block;">
+        🛡️ {% trans "Administrator Account Active" %}
+      </span>
+      {% else %}
+      <span style="background: var(--sky); color: var(--ink); font-weight: 800; font-size: 0.9rem; padding: 6px 14px; border-radius: 99px; border: 1.5px solid var(--ink); display: inline-block;">
+        👁️ {% trans "Assistive User Account Active" %}
+      </span>
+      {% endif %}
+    </div>
+
+    <p style="font-size: 1rem; color: var(--ink); margin-bottom: 22px;">
+      {% trans "You are currently signed in on this phone." %}
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      {% if request.user.is_staff or request.user.is_superuser %}
+      <a href="/admin/" class="btn pri" style="min-height: 58px; font-size: 1.1rem; justify-content: center;">
+        ⚙️ {% trans "Open Administration Panel" %} &rarr;
+      </a>
+      {% endif %}
+      <a href="{% url 'user-profile' %}" class="btn" style="min-height: 54px; font-size: 1.05rem; justify-content: center; background: var(--lilac); color: var(--ink);">
+        👤 {% trans "View Full Profile" %} &rarr;
+      </a>
+      <a href="{% url 'navigate' %}" class="btn pri" style="min-height: 54px; font-size: 1.05rem; justify-content: center;">
+        👁️ {% trans "Start Navigation Aid" %} &rarr;
+      </a>
+      <a href="{% url 'settings' %}" class="btn" style="min-height: 52px; font-size: 1rem; justify-content: center;">
+        ⚙️ {% trans "Assistive Audio & Haptics Settings" %}
+      </a>
+      <a href="{% url 'user-logout' %}" class="btn" style="min-height: 52px; font-size: 1rem; justify-content: center; background: var(--peach); color: var(--ink);">
+        🚪 {% trans "Sign Out / Switch Account" %}
+      </a>
+    </div>
+  </div>
+  {% else %}
+
+  <div class="page-card" style="margin-top: 20px; padding: clamp(24px, 5vw, 40px);">
+    {% if error %}
+    <div style="background: #ffd9b8; border: 2px solid var(--ink); border-radius: 14px; padding: 12px 16px; margin-bottom: 20px; font-weight: 700; color: #b71c1c;">
+      ⚠ {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'user-login' %}" style="display: flex; flex-direction: column; gap: 18px;">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next|default:'/' }}">
+
+      <div>
+        <label for="username" style="display: block; font-weight: 700; margin-bottom: 6px; font-size: 1.05rem;">
+          {% trans "Username or Email" %}
+        </label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          required
+          autocapitalize="none"
+          autocomplete="username"
+          value="{% if entered_username %}{{ entered_username }}{% elif username %}{{ username }}{% endif %}"
+          placeholder="{% trans 'Enter your username or email' %}"
+          style="width: 100%; min-height: 56px; padding: 12px 16px; border-radius: 14px; border: 2px solid var(--ink); font-size: 1.1rem; background: #fff;"
+        >
+      </div>
+
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <label for="password" style="font-weight: 700; font-size: 1.05rem;">
+            {% trans "Password" %}
+          </label>
+        </div>
+        <div style="position: relative;">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="{% trans 'Enter your password' %}"
+            style="width: 100%; min-height: 56px; padding: 12px 50px 12px 16px; border-radius: 14px; border: 2px solid var(--ink); font-size: 1.1rem; background: #fff;"
+          >
+          <button
+            type="button"
+            id="togglePassword"
+            aria-label="{% trans 'Show or hide password' %}"
+            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 8px;"
+          >
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin helper notice -->
+      <div style="background: var(--lilac); border: 2px solid var(--ink); border-radius: 12px; padding: 10px 14px; font-size: 0.9rem; color: var(--ink);">
+        🛡️ <strong>{% trans "Admin Login:" %}</strong> {% trans "Enter admin username and password here. You will automatically be routed to the Admin Panel." %}
+      </div>
+
+      <!-- Device Merge Notice -->
+      <div style="background: var(--sky); border: 1.5px solid var(--ink); border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; color: var(--ink);">
+        ℹ️ {% trans "Any settings or emergency contacts saved on this phone will automatically merge into your account." %}
+      </div>
+
+      <button
+        type="submit"
+        class="btn pri"
+        style="min-height: 64px; font-size: 1.15rem; width: 100%; margin-top: 6px;"
+      >
+        {% trans "Log In" %} &rarr;
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(21,18,31,0.12); font-size: 0.98rem; display: flex; flex-direction: column; gap: 8px;">
+      <div>
+        {% trans "Don't have an account yet?" %}
+        <a href="{% url 'user-signup' %}" style="font-weight: 700; color: var(--vio); text-decoration: underline; margin-left: 4px;">
+          {% trans "Create free account" %}
+        </a>
+      </div>
+      <div>
+        <a href="/admin/" style="font-size: 0.88rem; color: var(--ink); text-decoration: underline; opacity: 0.8;">
+          {% trans "Go directly to Django Admin Panel" %} &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+  if (toggleBtn && passwordInput) {
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      toggleBtn.textContent = isPassword ? '🙈' : '👁️';
+    });
+  }
+});
+</script>
+{% endblock %}

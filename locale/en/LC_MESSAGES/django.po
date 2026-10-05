@@ -1,0 +1,214 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Netra 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-05 12:00+0000\n"
+"PO-Revision-Date: 2026-10-05 12:00+0000\n"
+"Last-Translator: Netra Team\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Netra: your phone just got eyes"
+msgstr "Netra: your phone just got eyes"
+
+msgid "Netra spots cars, people, stairs and obstacles through your camera, then tells you where they are with directional audio and speech."
+msgstr "Netra spots cars, people, stairs and obstacles through your camera, then tells you where they are with directional audio and speech."
+
+msgid "Skip to content"
+msgstr "Skip to content"
+
+msgid "Main"
+msgstr "Main"
+
+msgid "Features"
+msgstr "Features"
+
+msgid "How"
+msgstr "How"
+
+msgid "Impact"
+msgstr "Impact"
+
+msgid "Language selection"
+msgstr "Language selection"
+
+msgid "Switch to English"
+msgstr "Switch to English"
+
+msgid "हिन्दी में बदलें"
+msgstr "हिन्दी में बदलें"
+
+msgid "Calm: on"
+msgstr "Calm: on"
+
+msgid "Calm mode"
+msgstr "Calm mode"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "Netra is an assistive aid that complements a cane or guide dog. Distance estimates are approximate."
+msgstr "Netra is an assistive aid that complements a cane or guide dog. Distance estimates are approximate."
+
+msgid "free"
+msgstr "free"
+
+msgid "offline"
+msgstr "offline"
+
+msgid "no extra gadgets"
+msgstr "no extra gadgets"
+
+msgid "Your phone just got"
+msgstr "Your phone just got"
+
+msgid "eyes."
+msgstr "eyes."
+
+msgid "Netra spots cars, people, stairs and potholes through your camera, then tells you where they are. Out loud, in Hindi or English, from the side they're on."
+msgstr "Netra spots cars, people, stairs and potholes through your camera, then tells you where they are. Out loud, in Hindi or English, from the side they're on."
+
+msgid "Start walking"
+msgstr "Start walking"
+
+msgid "Try the demo"
+msgstr "Try the demo"
+
+msgid "Netra says"
+msgstr "Netra says"
+
+msgid "All clear ahead."
+msgstr "All clear ahead."
+
+msgid "Person, ahead, 4 metres."
+msgstr "Person, ahead, 4 metres."
+
+msgid "Car coming, left, 6 metres."
+msgstr "Car coming, left, 6 metres."
+
+msgid "Stairs, right, 2 metres."
+msgstr "Stairs, right, 2 metres."
+
+msgid "Green light. You can cross."
+msgstr "Green light. You can cross."
+
+msgid "HEAR THE ROAD"
+msgstr "HEAR THE ROAD"
+
+msgid "WALK FREE"
+msgstr "WALK FREE"
+
+msgid "NO GADGETS"
+msgstr "NO GADGETS"
+
+msgid "WORKS OFFLINE"
+msgstr "WORKS OFFLINE"
+
+msgid "HINDI + ENGLISH"
+msgstr "HINDI + ENGLISH"
+
+msgid "YOUR PHONE. YOUR PATH."
+msgstr "YOUR PHONE. YOUR PATH."
+
+msgid "What it does"
+msgstr "What it does"
+
+msgid "Small app."
+msgstr "Small app."
+
+msgid "Big"
+msgstr "Big"
+
+msgid "awareness."
+msgstr "awareness."
+
+msgid "Sound from the right side"
+msgstr "Sound from the right side"
+
+msgid "A beep on the left means it's on your left. Higher pitch means closer."
+msgstr "A beep on the left means it's on your left. Higher pitch means closer."
+
+msgid "Runs on your phone"
+msgstr "Runs on your phone"
+
+msgid "The AI lives in the browser. No internet needed, and no video leaves your device."
+msgstr "The AI lives in the browser. No internet needed, and no video leaves your device."
+
+msgid "Only what matters"
+msgstr "Only what matters"
+
+msgid "A moving car beats a parked bike. Silence means clear."
+msgstr "A moving car beats a parked bike. Silence means clear."
+
+msgid "Hindi + English"
+msgstr "Hindi + English"
+
+msgid "Voice commands too. Just ask, \"what's in front of me?\""
+msgstr "Voice commands too. Just ask, \"what's in front of me?\""
+
+msgid "Crossing helper"
+msgstr "Crossing helper"
+
+msgid "Reads traffic lights: wait or go."
+msgstr "Reads traffic lights: wait or go."
+
+msgid "Install in one tap"
+msgstr "Install in one tap"
+
+msgid "Open the link, hit Add to Home Screen. Feels like any other app, and costs nothing."
+msgstr "Open the link, hit Add to Home Screen. Feels like any other app, and costs nothing."
+
+msgid "How it works"
+msgstr "How it works"
+
+msgid "Three steps."
+msgstr "Three steps."
+
+msgid "No setup."
+msgstr "No setup."
+
+msgid "See"
+msgstr "See"
+
+msgid "The camera streams live video and the AI reads every frame, many times a second."
+msgstr "The camera streams live video and the AI reads every frame, many times a second."
+
+msgid "Think"
+msgstr "Think"
+
+msgid "It works out direction and distance, then ranks what's most dangerous right now."
+msgstr "It works out direction and distance, then ranks what's most dangerous right now."
+
+msgid "Tell"
+msgstr "Tell"
+
+msgid "One short phrase, one beep from the right side, one vibration. That's it."
+msgstr "One short phrase, one beep from the right side, one vibration. That's it."
+
+msgid "Independence shouldn't"
+msgstr "Independence shouldn't"
+
+msgid "cost a fortune."
+msgstr "cost a fortune."
+
+msgid "extra devices needed"
+msgstr "extra devices needed"
+
+msgid "languages at launch"
+msgstr "languages at launch"
+
+msgid "looks per second"
+msgstr "looks per second"
+
+msgid "stays on your phone"
+msgstr "stays on your phone"
+
+msgid "Ready to walk"
+msgstr "Ready to walk"
+
+msgid "your way?"
+msgstr "your way?"

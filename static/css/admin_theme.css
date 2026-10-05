@@ -1,0 +1,576 @@
+/**
+ * Netra AI - Professional Accessible Django Admin Theme
+ * Mobile-first, ultra-high contrast, WCAG AAA compliant styling
+ */
+
+/* -----------------------------------------------------------------------------
+   1. Django 5 Theme Variables Lock (Forces High Contrast in Light & Dark Mode)
+   ----------------------------------------------------------------------------- */
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+  --primary: #15121f !important;
+  --secondary: #5b3df5 !important;
+  --accent: #5b3df5 !important;
+  --primary-fg: #ffffff !important;
+  
+  --body-fg: #15121f !important;
+  --body-bg: #f8f5f0 !important;
+  --body-quiet-color: #5f5a6e !important;
+  --body-loud-color: #15121f !important;
+  
+  --header-color: #15121f !important;
+  --header-bg: #ffffff !important;
+  --header-link-color: #5b3df5 !important;
+  
+  --breadcrumbs-fg: #15121f !important;
+  --breadcrumbs-bg: #ede6dc !important;
+  --breadcrumbs-link-fg: #5b3df5 !important;
+  
+  --link-fg: #4325c9 !important;
+  --link-hover-color: #15121f !important;
+  --link-selected-fg: #4325c9 !important;
+  
+  --hairline-color: rgba(21, 18, 31, 0.15) !important;
+  --border-color: #15121f !important;
+  
+  --darkened-bg: #ede6dc !important;
+  --selected-bg: #e6e0f8 !important;
+  --selected-row: #f0ecfa !important;
+  
+  --button-fg: #ffffff !important;
+  --button-bg: #15121f !important;
+  --button-hover-bg: #352f44 !important;
+  
+  --default-button-bg: #5b3df5 !important;
+  --default-button-hover-bg: #4325c9 !important;
+  
+  --message-success-bg: #d4f55a !important;
+  --message-warning-bg: #ffd9b8 !important;
+  --message-error-bg: #ffcdd2 !important;
+}
+
+/* -----------------------------------------------------------------------------
+   2. Base Typography & Structure
+   ----------------------------------------------------------------------------- */
+html, body {
+  background: #f8f5f0 !important;
+  color: #15121f !important;
+  font-family: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+h1, h2, h3, h4, #site-name {
+  font-family: "Bricolage Grotesque", "Atkinson Hyperlegible", sans-serif !important;
+  font-weight: 800 !important;
+  color: #15121f !important;
+  letter-spacing: -0.02em !important;
+}
+
+a {
+  color: #4325c9 !important;
+  text-decoration: underline !important;
+}
+
+a:hover {
+  color: #15121f !important;
+}
+
+/* -----------------------------------------------------------------------------
+   3. Header & User Navigation Bar
+   ----------------------------------------------------------------------------- */
+#header {
+  background: #ffffff !important;
+  color: #15121f !important;
+  border-bottom: 2.5px solid #15121f !important;
+  padding: 14px 20px !important;
+  box-shadow: 0 4px 0 rgba(21, 18, 31, 0.08) !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+#header a {
+  color: #15121f !important;
+  text-decoration: none !important;
+}
+
+#branding {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+#user-tools {
+  font-size: 0.95rem !important;
+  color: #5f5a6e !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  text-align: right !important;
+}
+
+#user-tools strong {
+  color: #15121f !important;
+  background: #d9ccff !important;
+  padding: 3px 8px !important;
+  border-radius: 8px !important;
+  border: 1px solid #15121f !important;
+}
+
+#user-tools a {
+  color: #4325c9 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+}
+
+#user-tools button,
+#logout-form button {
+  background: #ffd9b8 !important;
+  color: #15121f !important;
+  border: 1.5px solid #15121f !important;
+  border-radius: 99px !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  padding: 5px 12px !important;
+  cursor: pointer !important;
+}
+
+/* -----------------------------------------------------------------------------
+   4. Breadcrumbs
+   ----------------------------------------------------------------------------- */
+div.breadcrumbs {
+  background: #ede6dc !important;
+  color: #5f5a6e !important;
+  border-bottom: 2px solid #15121f !important;
+  padding: 10px 20px !important;
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+}
+
+div.breadcrumbs a {
+  color: #4325c9 !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+}
+
+div.breadcrumbs a:hover {
+  text-decoration: underline !important;
+}
+
+/* -----------------------------------------------------------------------------
+   5. Main Content Container & Layout Bugfixes
+   ----------------------------------------------------------------------------- */
+#container {
+  min-width: 0 !important;
+  background: #f8f5f0 !important;
+}
+
+.main {
+  min-width: 0 !important;
+}
+
+#content {
+  padding: clamp(16px, 3.5vw, 36px) !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+}
+
+/* CRITICAL FIX: Django sets margin-right: 300px for .colMS on dashboard */
+#content.colMS,
+.colMS {
+  margin-right: 0 !important;
+  width: 100% !important;
+  float: none !important;
+  box-sizing: border-box !important;
+}
+
+#content-main {
+  float: none !important;
+  width: 100% !important;
+}
+
+#content-related {
+  float: none !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+  margin-top: 32px !important;
+  box-sizing: border-box !important;
+}
+
+/* -----------------------------------------------------------------------------
+   6. Dashboard Modules & App Tables
+   ----------------------------------------------------------------------------- */
+.module {
+  background: #ffffff !important;
+  border: 2px solid #15121f !important;
+  border-radius: 20px !important;
+  box-shadow: 4px 4px 0 #15121f !important;
+  margin-bottom: 24px !important;
+  overflow: hidden !important;
+}
+
+.module caption,
+.module h2 {
+  background: #f4eee4 !important;
+  color: #15121f !important;
+  border-bottom: 2px solid #15121f !important;
+  font-family: "Bricolage Grotesque", sans-serif !important;
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  padding: 14px 20px !important;
+  text-align: left !important;
+}
+
+.module caption a {
+  color: #15121f !important;
+  text-decoration: none !important;
+}
+
+.module table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+.module tr {
+  border-bottom: 1px solid rgba(21, 18, 31, 0.1) !important;
+  transition: background 0.15s !important;
+}
+
+.module tr:hover {
+  background: #fdfbf7 !important;
+}
+
+.module th {
+  padding: 14px 20px !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+}
+
+.module th a {
+  color: #15121f !important;
+  text-decoration: none !important;
+}
+
+.module th a:hover {
+  color: #4325c9 !important;
+  text-decoration: underline !important;
+}
+
+.module td {
+  padding: 12px 16px !important;
+  text-align: right !important;
+  white-space: nowrap !important;
+}
+
+/* Tactile "+ Add" and "Change" action pills */
+.addlink {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: #d4f55a !important;
+  color: #15121f !important;
+  font-weight: 800 !important;
+  font-size: 0.88rem !important;
+  padding: 6px 14px !important;
+  border-radius: 99px !important;
+  border: 1.5px solid #15121f !important;
+  text-decoration: none !important;
+  box-shadow: 2px 2px 0 #15121f !important;
+  margin-right: 6px !important;
+}
+
+.changelink {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: #d9ccff !important;
+  color: #15121f !important;
+  font-weight: 800 !important;
+  font-size: 0.88rem !important;
+  padding: 6px 14px !important;
+  border-radius: 99px !important;
+  border: 1.5px solid #15121f !important;
+  text-decoration: none !important;
+  box-shadow: 2px 2px 0 #15121f !important;
+}
+
+.viewlink {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: #ffd9b8 !important;
+  color: #15121f !important;
+  font-weight: 800 !important;
+  font-size: 0.88rem !important;
+  padding: 6px 14px !important;
+  border-radius: 99px !important;
+  border: 1.5px solid #15121f !important;
+  text-decoration: none !important;
+  box-shadow: 2px 2px 0 #15121f !important;
+}
+
+/* -----------------------------------------------------------------------------
+   7. Change-List (Tables, Filters & Search)
+   ----------------------------------------------------------------------------- */
+#changelist {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+  width: 100% !important;
+}
+
+#toolbar {
+  background: #ffffff !important;
+  border: 2px solid #15121f !important;
+  border-radius: 16px !important;
+  padding: 12px 16px !important;
+  box-shadow: 3px 3px 0 #15121f !important;
+  margin-bottom: 12px !important;
+}
+
+#toolbar form input[type="text"] {
+  border: 2px solid #15121f !important;
+  border-radius: 10px !important;
+  padding: 8px 14px !important;
+  font-size: 1rem !important;
+  min-height: 44px !important;
+}
+
+#changelist-form .results {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  border: 2px solid #15121f !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  box-shadow: 4px 4px 0 #15121f !important;
+  margin-bottom: 20px !important;
+}
+
+#result_list {
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+#result_list th {
+  background: #ede6dc !important;
+  color: #15121f !important;
+  font-weight: 800 !important;
+  padding: 14px 16px !important;
+  border-bottom: 2px solid #15121f !important;
+  font-size: 0.95rem !important;
+  white-space: nowrap !important;
+}
+
+#result_list th a {
+  color: #15121f !important;
+  text-decoration: none !important;
+}
+
+#result_list td {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid rgba(21, 18, 31, 0.1) !important;
+  font-size: 0.95rem !important;
+  color: #15121f !important;
+}
+
+#result_list tr:nth-child(even) td {
+  background: #faf8f5 !important;
+}
+
+#result_list tr:hover td {
+  background: #f0ecfa !important;
+}
+
+/* Filter Panel */
+#changelist-filter {
+  background: #ffffff !important;
+  border: 2px solid #15121f !important;
+  border-radius: 20px !important;
+  box-shadow: 4px 4px 0 #15121f !important;
+  padding: 18px !important;
+}
+
+#changelist-filter h2 {
+  font-size: 1.15rem !important;
+  border-bottom: 2px solid #15121f !important;
+  padding-bottom: 10px !important;
+  margin-bottom: 14px !important;
+}
+
+#changelist-filter ul {
+  padding-left: 0 !important;
+  list-style: none !important;
+}
+
+#changelist-filter li {
+  padding: 6px 0 !important;
+}
+
+#changelist-filter a {
+  color: #4325c9 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+#changelist-filter a:hover {
+  text-decoration: underline !important;
+}
+
+#changelist-filter li.selected a {
+  font-weight: 800 !important;
+  color: #15121f !important;
+  background: #d4f55a !important;
+  padding: 2px 8px !important;
+  border-radius: 6px !important;
+  border: 1px solid #15121f !important;
+}
+
+/* -----------------------------------------------------------------------------
+   8. Buttons, Forms & Tactile Inputs
+   ----------------------------------------------------------------------------- */
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+  background: #15121f !important;
+  color: #ffffff !important;
+  border: 2px solid #15121f !important;
+  border-radius: 99px !important;
+  padding: 10px 22px !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  box-shadow: 3px 3px 0 #5b3df5 !important;
+  cursor: pointer !important;
+  min-height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  transition: transform 0.15s, box-shadow 0.15s !important;
+}
+
+.button:hover,
+input[type="submit"]:hover,
+.submit-row input:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 5px 5px 0 #5b3df5 !important;
+}
+
+.button.default,
+input[type="submit"].default {
+  background: #5b3df5 !important;
+  box-shadow: 3px 3px 0 #15121f !important;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="number"],
+textarea,
+select {
+  border: 2px solid #15121f !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  font-size: 16px !important; /* Prevents auto-zoom on mobile */
+  background: #ffffff !important;
+  color: #15121f !important;
+  min-height: 48px !important;
+  box-sizing: border-box !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: 3px solid #5b3df5 !important;
+  outline-offset: 2px !important;
+}
+
+/* -----------------------------------------------------------------------------
+   9. Mobile Responsiveness (Smartphones < 768px)
+   ----------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  #header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 12px 14px !important;
+  }
+
+  #user-tools {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    font-size: 0.88rem !important;
+  }
+
+  /* Hide left nav-sidebar on small mobile screens to prevent crushing content */
+  #nav-sidebar {
+    display: none !important;
+  }
+
+  .main.shifted {
+    margin-left: 0 !important;
+  }
+
+  .toggle-nav-sidebar {
+    display: none !important;
+  }
+
+  #content {
+    padding: 14px 12px !important;
+  }
+
+  .module {
+    border-radius: 14px !important;
+    box-shadow: 3px 3px 0 #15121f !important;
+  }
+
+  .module caption, .module h2 {
+    font-size: 1.1rem !important;
+    padding: 10px 14px !important;
+  }
+
+  .module th {
+    padding: 10px 12px !important;
+    font-size: 0.95rem !important;
+  }
+
+  .module td {
+    padding: 8px 10px !important;
+  }
+
+  .addlink, .changelink, .viewlink {
+    padding: 4px 10px !important;
+    font-size: 0.82rem !important;
+    margin-bottom: 4px !important;
+  }
+
+  #changelist-filter {
+    position: static !important;
+    width: 100% !important;
+    margin-top: 16px !important;
+  }
+
+  .submit-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 14px !important;
+  }
+
+  .submit-row input,
+  .submit-row .button {
+    width: 100% !important;
+    min-height: 52px !important;
+    font-size: 1.05rem !important;
+  }
+}

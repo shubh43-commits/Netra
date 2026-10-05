@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: netra-ai
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt && python manage.py migrate"
+    startCommand: "daphne -b 0.0.0.0 -p $PORT config.asgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.dev
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost,127.0.0.1"
+      - key: CORS_ALLOW_ALL_ORIGINS
+        value: "True"

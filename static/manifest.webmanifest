@@ -1,0 +1,64 @@
+{
+  "name": "Netra: your phone just got eyes",
+  "short_name": "Netra",
+  "description": "Netra spots cars, people, stairs and obstacles through your camera, then tells you where they are with directional audio beeps and speech.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5efe6",
+  "theme_color": "#f5efe6",
+  "icons": [
+    {
+      "src": "/static/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "accessibility",
+    "navigation",
+    "utilities"
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Walking",
+      "short_name": "Navigate",
+      "description": "Start live camera obstacle detection and audio alerts",
+      "url": "/navigate/",
+      "icons": [
+        {
+          "src": "/static/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Try Demo",
+      "short_name": "Demo",
+      "description": "Experience simulated street audio guidance",
+      "url": "/demo/",
+      "icons": [
+        {
+          "src": "/static/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "lang": "en",
+  "dir": "ltr"
+}

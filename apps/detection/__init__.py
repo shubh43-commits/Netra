@@ -1,0 +1,1 @@
+"""Netra Detection app."""

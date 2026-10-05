@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Netra: Offline Mode" %} &middot; Netra{% endblock %}
+
+{% block content %}
+<main id="main" class="wrap page-hero">
+  <span class="sticker" style="margin-bottom: 20px;">{% trans "offline mode" %} &middot; {% trans "cached on device" %}</span>
+  <h1>{% trans "You are" %} <mark>{% trans "offline." %}</mark></h1>
+  <p class="lead">{% trans "Don't worry: Netra runs on-device AI and is built to operate completely without internet reception." %}</p>
+
+  <div class="page-card">
+    <div class="bubble" style="margin-bottom: 24px;">
+      <span class="pulse" style="background: var(--lime);" aria-hidden="true"></span>
+      <div>
+        <small>{% trans "Network status" %}</small>
+        <span>{% trans "Internet disconnected &middot; On-device navigation remains active." %}</span>
+      </div>
+    </div>
+
+    <div class="bento" style="margin-bottom: 30px;">
+      <article class="tile a" style="grid-column: span 3; min-height: 180px;">
+        <span class="n">1</span>
+        <div>
+          <h3>{% trans "100% On-Device" %}</h3>
+          <p>{% trans "Camera scanning and audio beeps execute locally on your browser. No cellular signal required." %}</p>
+        </div>
+      </article>
+      <article class="tile b" style="grid-column: span 3; min-height: 180px;">
+        <span class="n">2</span>
+        <div>
+          <h3>{% trans "Cached App Shell" %}</h3>
+          <p>{% trans "The service worker has saved the core app shell so you can keep walking safely." %}</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="cta" style="margin: 0;">
+      <a class="btn pri" href="{% url 'navigate' %}">{% trans "Open Live Navigation" %} &rarr;</a>
+      <a class="btn sec" href="javascript:window.location.reload()">{% trans "Retry Connection" %}</a>
+    </div>
+  </div>
+</main>
+{% endblock %}
