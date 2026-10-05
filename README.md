@@ -13,8 +13,6 @@
 
 **Accessible, real-time spatial orientation, monocular obstacle detection, and binaural 3D directional audio guidance aid for individuals who are blind or visually impaired.**
 
-[Explore Live Demo](http://127.0.0.1:8000/demo/) • [Interactive API Docs](http://127.0.0.1:8000/api/docs/) • [Deployment Guide](docs/DEPLOYMENT.md) • [System Architecture](docs/README.md)
-
 </div>
 
 ---
