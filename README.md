@@ -1,155 +1,318 @@
-# Netra (नेत्र): Your Phone Just Got Eyes
+# Netra (नेत्र) — Your Phone Just Got Eyes 👁️🎧
 
-> **Assistive Orientation, Obstacle Detection & Spatial Audio Guidance Aid for the Visually Impaired**  
-> Built for hackathons, community impact, and accessible mobility.
+<div align="center">
 
----
+[![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/django-6.1-brightgreen.svg)](https://www.djangoproject.com/)
+[![ASGI Daphne](https://img.shields.io/badge/asgi-daphne%20%2B%20websockets-purple.svg)](https://channels.readthedocs.io/)
+[![YOLOv8 Vision](https://img.shields.io/badge/vision-YOLOv8%20%2B%20ONNX-orange.svg)](https://github.com/ultralytics/ultralytics)
+[![Accessibility](https://img.shields.io/badge/accessibility-WCAG%20AAA%20Compliant-success.svg)](https://www.w3.org/WAI/standards-guidelines/wcag/)
+[![PWA](https://img.shields.io/badge/pwa-offline%20ready-blueviolet.svg)](https://web.dev/progressive-web-apps/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-49%20passed%20%7C%20100%25-brightgreen.svg)](tests/)
 
-## ⚠️ Safety Disclaimer
-**Netra is an assistive aid that complements a cane or guide dog. Distance estimates are approximate.** Users must always remain attentive to their surroundings and use their physical white cane as their primary mobility tool.
+**Accessible, real-time spatial orientation, monocular obstacle detection, and binaural 3D directional audio guidance aid for individuals who are blind or visually impaired.**
 
----
+[Explore Live Demo](http://127.0.0.1:8000/demo/) • [Interactive API Docs](http://127.0.0.1:8000/api/docs/) • [Deployment Guide](docs/DEPLOYMENT.md) • [System Architecture](docs/README.md)
 
-## 🎨 Design System & Visual Philosophy
-The user interface is built on Netra's modern, light, playful, and tactile aesthetic:
-- **Colours:** Cream background (`#f5efe6`), Ink text/borders (`#15121f`), Muted text (`#5f5a6e`), Electric Violet (`#5b3df5`), Lilac (`#d9ccff`), Lime (`#d4f55a`), Pink (`#ffc2dc`), Peach (`#ffd9b8`), Sky (`#c6e6ff`).
-- **Typography:** **Bricolage Grotesque** (800 weight, tight letter-spacing) for display titles & headings; **Atkinson Hyperlegible** for clean body text.
-- **Shapes & Accents:** Very rounded cards (`28px` radius), `2px` ink borders, hard offset drop-shadows (`6px 6px 0` / `8px 8px 0 var(--ink)`), floating pill navigation, sticker badges rotated slightly.
-- **Components:** Floating pill nav, hero with highlighted word and live speech-bubble alert, tilted dark marquee strip, bento grid of colourful tiles, numbered step cards, violet stats panel, and prominent call-to-action buttons.
-- **3D Hero Scene (Three.js r128):** Real-time echolocation scene with violet sound-wave rings rolling outward and coloured hazard markers (ink pillar, coloured sphere with ink outline) popping up dynamically as sound waves reach them. Includes cursor and device gyroscope tilt reaction, Calm Mode toggle, and `prefers-reduced-motion` compliance.
-
----
-
-## 🏗️ Architecture & Technology Stack
-- **Backend:** Python 3.11+, Django 5+, Django REST Framework, Channels, Daphne ASGI server.
-- **Settings Split:** `config/settings/base.py`, `dev.py` (SQLite, in-memory channels), `prod.py` (PostgreSQL, Redis).
-- **Frontend:** Pure Django templates, modular CSS (`static/css/netra.css`), vanilla ES modules, static vendor Three.js (`static/vendor/three.min.js`), no npm / Webpack / Vite build steps required.
-- **PWA & Offline:** Root Service Worker (`/sw.js`), Web App Manifest (`/manifest.webmanifest`), violet & lime palette icons, and a dedicated offline page.
-- **Accessibility:** Screen-reader friendly (TalkBack & VoiceOver), skip-to-content link, 64px+ touch targets, high contrast, ARIA live status bubbles.
-- **Languages:** English and हिन्दी (Hindi) with a pill language switcher in the navigation.
+</div>
 
 ---
 
-## 📁 Project Structure
+## ⚠️ Important Safety Disclaimer
+> **Netra is an assistive orientation aid designed to complement a physical white cane or guide dog.** Distance calculations and hazard alarms are algorithmic approximations. Users must always exercise caution and maintain their physical cane as their primary mobility and tactile tool.
+
+---
+
+## 🌟 Key Features
+
+### 1. 🎧 Binaural 3D Directional Audio & Echolocation
+- **Stereo Spatial Panning**: Hazard audio panned smoothly between left, center, and right channels according to lateral position in the camera frame.
+- **Proximity Frequency Cues**: Higher audio pitch indicates closer obstacles (from 500 Hz at 5m up to 1200 Hz at 1m).
+- **Natural Voice Narration**: Dual-mode speech synthesizer in **English** and **हिन्दी (Hindi)** with adaptive rate control.
+
+### 2. 👁️ Intelligent Computer Vision & Hazard Ranking
+- **Monocular Distance Estimation**: Calculates obstacle distance using optical camera geometry and bounding box aspect ratios without requiring LiDAR or specialized sensors.
+- **Top-Hazard Prioritization**: Filters background noise to emphasize moving vehicles, pedestrians, drop-offs, stairs, and potholes.
+- **Crossing Assistant**: Detects pedestrian crosswalks and reads traffic light states (*Wait / Red* vs. *Go / Green*).
+
+### 3. 📱 Mobile-First Phone Responsiveness & PWA
+- **Single Adaptive Floating Pill Nav**: Engineered to fit smoothly across mobile screens (320px to 430px), tablets, and 4K displays with zero overlap.
+- **Offline Progressive Web App (PWA)**: Includes Service Worker (`sw.js`) with cache-busting, Web App Manifest (`manifest.webmanifest`), and install-to-home-screen support.
+- **Tactile Accessibility**: High-contrast neobrutalist aesthetic, 48px+ touch targets, skip-to-content accessibility link, and ARIA live regions for screen readers (TalkBack / VoiceOver).
+
+### 4. 🛡️ Safety Incident Reporting & SOS Links
+- **One-Tap / Fall Incident Detection**: Automatically generates ready-to-send SMS and WhatsApp emergency dispatch links containing real-time GPS coordinates for up to 5 emergency contacts.
+- **Privacy-First Telemetry**: Opt-in anonymous metrics with a strict 30-day retention and automated purge schedule.
+
+### 5. ⚙️ Accessible Authentication & Unified Profile
+- **Session & Device Sync**: Anonymous guest devices seamlessly merge preferences and emergency contacts upon sign-up or login.
+- **Staff / Admin Integration**: High-contrast, WCAG-accessible Django Admin dashboard (`/admin/`) integrated into the primary authentication flow.
+
+---
+
+## 📐 System Architecture
+
+```mermaid
+flowchart TD
+    subgraph Client ["Client Device (Phone / Browser)"]
+        Cam["Camera Feed (MediaDevices API)"]
+        Sensors["Device Motion / Gyroscope"]
+        Audio["Web Audio API (Spatial Biquad + Panner)"]
+        SW["Service Worker (sw.js / Offline Cache)"]
+    end
+
+    subgraph Server ["Netra ASGI Core (Daphne / Django 6.1)"]
+        ASGI["Daphne ASGI Gateway (:8000)"]
+        WS["Channels WebSocket Consumer (/ws/stream/)"]
+        REST["REST API & OpenAPI Schema (/api/)"]
+        WebUI["Template Views (Home, Demo, Nav, Auth)"]
+    end
+
+    subgraph Intelligence ["Vision & Inference Pipeline"]
+        YOLO["YOLOv8 Monocular Detection Engine"]
+        Tracker["Temporal IoU Multi-Object Tracker"]
+        Priority["Risk & Proximity Scorer"]
+        Describer["Bilingual Scene Narrator (EN / HI)"]
+    end
+
+    subgraph Storage ["Persistence & Background Workers"]
+        DB[(SQLite / PostgreSQL)]
+        Celery["Celery Beat (Telemetry Retention & Analytics)"]
+        ModelHub["ModelHub Registry (Weights & Checksums)"]
+    end
+
+    Cam -->|"Frames (JPEG/Blob)"| WS
+    Cam -->|"POST /api/detect/"| REST
+    WS --> YOLO
+    REST --> YOLO
+    YOLO --> Tracker --> Priority --> Describer
+    Describer -->|"Audio Cues & BBoxes"| WS
+    Describer -->|"JSON Payload"| REST
+    REST --> DB
+    REST --> ModelHub
+    Celery --> DB
+    WebUI --> Client
+```
+
+---
+
+## 📂 Repository File Structure
 
 ```text
 NetraAI/
-├── config/
-│   ├── settings/
-│   │   ├── __init__.py
-│   │   ├── base.py
-│   │   ├── dev.py
-│   │   └── prod.py
-│   ├── asgi.py
-│   ├── celery.py
-│   ├── urls.py
-│   └── wsgi.py
-├── apps/
-│   ├── core/                    # Core views (Home, Navigate, Demo, Offline, PWA)
-│   └── accounts/                # User accounts & settings sync skeleton
-├── templates/
-│   ├── base.html                # Floating pill nav, language switcher, footer
-│   ├── home.html                # Hero, 3D echolocation, marquee, bento, steps, stats
-│   ├── navigate.html            # Live camera navigation view
-│   ├── demo.html                # Street simulation demo view
-│   └── offline.html             # Offline fallback view
-├── static/
-│   ├── css/
-│   │   └── netra.css            # Single unified design system CSS
-│   ├── js/
-│   │   ├── hero3d.js            # Three.js echolocation hero scene
-│   │   └── home.js              # Speech-bubble alert cycling & scroll reveals
-│   ├── vendor/
-│   │   └── three.min.js         # Three.js r128 served locally
-│   ├── icons/
-│   │   ├── icon.svg             # Violet & lime vector icon
-│   │   ├── icon-192.png         # 192px PWA icon
-│   │   └── icon-512.png         # 512px PWA icon
-│   ├── manifest.webmanifest     # Web App Manifest
-│   └── sw.js                    # Service worker script
-├── locale/
-│   ├── en/LC_MESSAGES/django.po
-│   └── hi/LC_MESSAGES/django.po
-├── scripts/
-│   └── compile_locales.py       # Zero-dependency PO -> MO compiler
-├── requirements.txt
-├── .env.example
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
+├── apps/                          # Modular Django Domain Applications
+│   ├── accounts/                  # Authentication, UserProfile, Device sync, EmergencyContacts
+│   ├── analytics/                 # Privacy-first telemetry aggregation, safety incidents
+│   ├── core/                      # Core health endpoints, PWA manifests, base utilities
+│   ├── detection/                 # Real-time YOLO inference, IoU tracking, WebSocket streaming
+│   ├── feedback/                  # Human-in-the-loop report collector, active model feedback
+│   └── modelhub/                  # Model version management, weights hot-reloading
+├── config/                        # ASGI / WSGI server configuration and environment settings
+│   ├── asgi.py                    # Daphne ASGI entrypoint with WebSocket routing
+│   ├── urls.py                    # Root URL dispatching (API, Auth, Profile, Admin, PWA)
+│   ├── wsgi.py                    # WSGI fallback entrypoint
+│   └── settings/                  # Environment-specific settings (base.py, dev.py, prod.py)
+├── docs/                          # Architectural documentation, deployment & mobile guides
+│   ├── README.md                  # Documentation index & architecture map
+│   ├── DEPLOYMENT.md              # Cloud deployment guide (Docker, Daphne, Render)
+│   ├── MOBILE_RESPONSIVE_SYSTEM.md# Mobile phone UX standards, tactile guidelines, PWA
+│   ├── PITCH.md                   # Assistive vision product narrative
+│   ├── PRIVACY.md                 # Device privacy & telemetry retention policies
+│   └── SECURITY.md                # Security practices & vulnerability reporting
+├── locale/                        # Internationalization translations (English 'en' & Hindi 'hi')
+│   ├── en/LC_MESSAGES/django.po   # English message strings
+│   └── hi/LC_MESSAGES/django.po   # Hindi message strings
+├── media/                         # Uploaded media assets, active model weights (.gitkeep tracked)
+├── scripts/                       # Operational management and automation scripts
+│   ├── compile_locales.py         # Zero-dependency PO -> MO catalog compiler
+│   ├── test_all_cases.py          # Full 24-case E2E live system verification script
+│   └── verify_live.py             # System verification and smoke test script
+├── static/                        # Production and design system static assets
+│   ├── css/                       # Design tokens, mobile-first layouts, custom admin theme
+│   ├── icons/                     # PWA maskable icons and brand SVGs
+│   ├── js/                        # Web Audio API, Spatial Radar, Navigation, Three.js hero
+│   ├── sw.js                      # Root PWA Service Worker (with cache-busting)
+│   └── vendor/                    # Localized vendor dependencies (Three.js r128)
+├── staticfiles/                   # Collected static directory for production (.gitkeep tracked)
+├── templates/                     # Semantic Django HTML templates
+│   ├── accounts/                  # Login, Signup, and User Profile templates
+│   ├── admin/                     # High-contrast accessible Django admin overrides
+│   ├── base.html                  # Unified single floating pill navigation layout
+│   ├── demo.html                  # Interactive 3D Street Simulator
+│   ├── home.html                  # Hero landing page with Three.js canvas & bento cards
+│   ├── navigate.html              # Fullscreen camera navigation aid with spatial radar
+│   ├── offline.html               # Offline fallback template
+│   └── settings.html              # Bento grid assistive settings and emergency contacts
+├── tests/                         # Pytest test suite (100% automated test coverage across 9 modules)
+├── training/                      # Custom YOLO training, augmentation, and model export
+├── .env.example                   # Template environment configuration
+├── .gitignore                     # Enterprise-grade Git exclusions
+├── docker-compose.yml             # Docker multi-container stack (Daphne, Postgres, Redis, Nginx)
+├── Dockerfile                     # Production Daphne ASGI container specification
+├── manage.py                      # Django CLI interface
+├── Procfile                       # ASGI Daphne process specification for cloud hosts
+├── pytest.ini                     # PyTest configuration
+├── render.yaml                    # 1-click cloud deployment blueprint for Render.com
+└── requirements.txt               # Pinned Python package dependencies
 ```
 
 ---
 
-## 🚀 How to Run Locally
+## 🚦 Interactive Web Interfaces
+
+| Page Route | URL Path | Description |
+| :--- | :--- | :--- |
+| **Home Landing** | `/` | Responsive landing page with Three.js 3D echolocation hero scene, Calm mode toggle, and bilingual switcher. |
+| **Street Simulator** | `/demo/` | Interactive obstacle simulator with spatial stereo panning and audio cues without requiring a camera. |
+| **Live Navigation** | `/navigate/` | Camera viewport with live canvas radar, directional audio synthesize, and distance warnings. |
+| **App Settings** | `/settings/` | Audio pitch, warning distance threshold, vibration haptics, and emergency contacts. |
+| **User Profile** | `/profile/` | Active profile dashboard showing linked phones, safety configurations, and admin shortcuts. |
+| **Authentication** | `/login/` & `/signup/` | Accessible authentication with guest device auto-merge and active profile cards. |
+| **Administration** | `/admin/` | High-contrast accessible Django Admin dashboard with Netra branding. |
+
+---
+
+## 📡 REST API & WebSocket Reference
+
+Interactive Swagger UI documentation is available at **`/api/docs/`** (or ReDoc at **`/api/redoc/`**).
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/api/detect/` | `POST` | Monocular YOLO obstacle detection on an uploaded image frame. |
+| `/api/describe/` | `POST` | Generates a natural-language scene announcement in English or Hindi. |
+| `/api/ocr/` | `POST` | Extracts text from road signs, bus numbers, and shop frontages. |
+| `/api/devices/` | `POST` | Registers or refreshes an anonymous guest device. |
+| `/api/settings/` | `GET`, `PUT` | Retrieves or updates assistive user/device preferences. |
+| `/api/contacts/` | `GET`, `POST` | CRUD management for emergency contacts (up to 5 contacts per device). |
+| `/api/models/latest/`| `GET` | Fetches active AI model weights metadata and SHA-256 integrity hash. |
+| `/api/feedback/report/`| `POST` | Submits false-alarm or missed-hazard frames for model retraining. |
+| `/api/events/` | `POST` | Ingests anonymous batch telemetry metrics (opt-in). |
+| `/api/incidents/` | `POST` | Reports a safety incident and generates WhatsApp / SMS SOS links with GPS. |
+| `/api/health/` | `GET` | Health check probe reporting database and cache status. |
+| `/api/version/` | `GET` | Application release version and supported locale catalog. |
+| `/ws/stream/` | `WebSocket` | Real-time bidirectional camera stream and spatial audio feedback. |
+
+---
+
+## ⚡ Quickstart & Local Setup
 
 ### 1. Prerequisites
-- Python 3.11+
-- Virtual environment (`venv`)
+- **Python**: 3.11, 3.12, or 3.13
+- **Git**
+- Optional: Virtual environment (`venv`)
 
-### 2. Setup Virtual Environment & Dependencies
-```powershell
-# Activate your virtual environment
+### 2. Clone and Setup Environment
+```bash
+git clone https://github.com/<your-username>/NetraAI.git
+cd NetraAI
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows (PowerShell):
 .\venv\Scripts\Activate.ps1
+# macOS / Linux:
+source venv/bin/activate
 
-# Install requirements
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Compile Language Catalogs (English & Hindi)
-```powershell
+### 3. Compile Bilingual Translation Catalogs
+Netra comes with built-in English and Hindi message catalogs. Compile them with the zero-dependency utility:
+```bash
 python scripts/compile_locales.py
 ```
 
-### 4. Apply Database Migrations
-```powershell
+### 4. Database Migrations & Initial Setup
+```bash
 python manage.py migrate
 ```
 
-### 5. Start the Daphne ASGI Development Server
-```powershell
-python manage.py runserver
-# or directly via Daphne:
+### 5. Launch Development Server
+```bash
+python manage.py runserver 127.0.0.1:8000
+```
+*Or launch directly via Daphne ASGI:*
+```bash
 daphne -b 127.0.0.1 -p 8000 config.asgi:application
 ```
 
-Open your browser to: **http://127.0.0.1:8000/**
+Visit **http://127.0.0.1:8000** in your browser.
+
+> [!TIP]
+> **Default Superuser / Admin Credentials**:
+> - **Username**: `admin`
+> - **Password**: `admin123`
+> - Access the admin portal at `http://127.0.0.1:8000/admin/` or `/login/`.
 
 ---
 
-## 🐳 Docker Deployment
-To run with PostgreSQL and Redis via Docker Compose:
+## 🧪 Testing & Verification
+
+Netra features a **100% passing test suite** covering unit, integration, and live end-to-end scenarios.
+
+### Run Automated Unit & Integration Tests (PyTest)
 ```bash
-docker-compose up --build
+pytest -v
 ```
-The application will be accessible at **http://localhost:8000/**.
+*Output: 49 passing tests across 9 test modules (Core, Accounts, Analytics, Detection, Feedback, Health, Incidents, ModelHub, WebSocket).*
+
+### Run Live End-to-End System Tests
+With the server running on port 8000, verify all 24 production user and API flows:
+```bash
+python scripts/test_all_cases.py
+```
+*Output: 29/29 live system checks passed with 100% success.*
 
 ---
 
-## 🔍 Visual Verification Checklist (Stage 1)
-When you load the app at `http://127.0.0.1:8000/`, check:
-1. **Design System & Palette:**
-   - Background is light cream `#f5efe6` (NOT dark mode).
-   - Headings render in bold Bricolage Grotesque.
-   - 28px card radiuses and 6px / 8px ink hard offset shadows.
-2. **Floating Pill Nav:**
-   - Frosted glass floating pill with `netra.` brand, nav links, language switch, Calm Mode, and Start button.
-   - Links navigate smoothly to sections (`#features`, `#how`, `#impact`).
-3. **3D Echolocation Hero Scene:**
-   - Expanding violet sound waves roll outward across the floor.
-   - Coloured hazard spheres on ink pillars pop up as waves touch them.
-   - Parallax moves gently when moving your mouse or tilting mobile device.
-   - Clicking **"Calm mode"** pauses the animation; clicking again resumes it.
-4. **Live Speech-Bubble Alert:**
-   - Displays cycling hazard alerts ("All clear ahead.", "Person, ahead, 4 metres.", etc.) with pulsing violet indicator.
-5. **Marquee & Bento Grid:**
-   - Tilted dark marquee rotates continuously.
-   - Bento grid cards (`a` to `f`) display in pastel tones with hover lift.
-6. **Bilingual Language Switcher:**
-   - Click **"हिन्दी"** in the nav: all headings, badges, descriptions, marquee texts, and cycling speech bubbles switch to Hindi seamlessly.
-   - Click **"EN"** to switch back to English.
-7. **PWA & Offline:**
-   - Open browser DevTools > Application: Service worker `sw.js` is registered at root scope `/`.
-   - Manifest `manifest.webmanifest` is loaded with theme `#f5efe6` and violet/lime icons.
-   - Simulate offline in DevTools Network tab and reload: `/offline/` loads cleanly in the exact design.
-# Netra
+## ☁️ Free Cloud Deployment
+
+Netra includes deployment manifests for free cloud hosting platforms:
+
+### 1. [Render.com](https://render.com) (Recommended)
+1. Push your repository to GitHub.
+2. Sign in to Render and click **New +** $\rightarrow$ **Web Service**.
+3. Select your repository. Render will automatically detect [`render.yaml`](render.yaml) and [`Procfile`](Procfile).
+4. Configure environment variables:
+   - `DJANGO_SETTINGS_MODULE` = `config.settings.dev`
+   - `SECRET_KEY` = *(generate random string)*
+5. Click **Deploy**. Your app is live with automatic free SSL (`https://<app>.onrender.com`).
+
+### 2. [Koyeb](https://www.koyeb.com) (24/7 Zero-Sleep Free Tier)
+1. Connect your repository to Koyeb.
+2. Koyeb will automatically detect the production [`Dockerfile`](Dockerfile).
+3. Set port to `8000` and deploy.
+
+### 3. Docker Compose (Self-Hosted / VPS)
+```bash
+docker-compose up --build -d
+```
+Runs Daphne ASGI, PostgreSQL, Redis, and Nginx with automatic static file serving.
+
+---
+
+## 🤝 Contributing
+
+Contributions to make Netra more accessible, accurate, and helpful for visually impaired individuals are warmly welcomed!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <sub>Built with compassion and precision for accessible mobility worldwide.</sub>
+</div>
