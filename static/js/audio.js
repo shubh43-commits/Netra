@@ -37,6 +37,7 @@ class NetraAudioEngine {
         this.voices = window.speechSynthesis.getVoices();
       };
       this.voices = window.speechSynthesis.getVoices();
+    }
     this.audioCache = new Map();
   }
 
@@ -71,6 +72,14 @@ class NetraAudioEngine {
       }
 
       this.masterGain.connect(this.audioCtx.destination);
+
+      // Prime speechSynthesis on user interaction
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      }
+
       this.unlocked = true;
     } catch (e) {
       console.warn('[Netra Audio] Could not initialize Web Audio context:', e);
@@ -123,62 +132,31 @@ class NetraAudioEngine {
 
   /**
    * Speak a spoken warning aloud with rate and queue throttling.
-   * Automatically uses natural Gemini / Neural AI audio when enabled.
+   * Instantaneous execution (0ms latency) using high-quality natural voice.
    * @param {string} text - Message to speak
    * @param {boolean} urgent - If true, cancels ongoing speech to announce immediately
    * @param {string} direction - 'left', 'ahead', 'right'
    */
-  async speak(text, urgent = false, direction = 'ahead') {
+  speak(text, urgent = false, direction = 'ahead') {
     if (this.muted || !this.speechEnabled || !text) return;
 
     const now = Date.now();
-    // Prevent repeating identical sentence within 3 seconds unless urgent
-    if (!urgent && text === this.lastSpokenText && (now - this.lastSpokenTime) < 3000) {
+    // Prevent repeating identical sentence within 2.5 seconds unless urgent
+    if (!urgent && text === this.lastSpokenText && (now - this.lastSpokenTime) < 2500) {
       return;
     }
 
     this.lastSpokenText = text;
     this.lastSpokenTime = now;
 
-    // 1. Natural AI speech via Gemini / Neural TTS
-    if (this.useGeminiAudio) {
-      try {
-        const cacheKey = `${this.language}:${text}`;
-        let cached = this.audioCache.get(cacheKey);
-
-        if (!cached) {
-          const resp = await fetch('/api/gemini/audio/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: text, language: this.language })
-          });
-          if (resp.ok) {
-            const json = await resp.json();
-            const d = json.data || {};
-            if (d.audio_base64) {
-              cached = { b64: d.audio_base64, mime: d.mime_type || 'audio/wav' };
-              if (this.audioCache.size > 50) this.audioCache.clear();
-              this.audioCache.set(cacheKey, cached);
-            }
-          }
-        }
-
-        if (cached && cached.b64) {
-          const played = await this.playAudioBase64(cached.b64, cached.mime, direction);
-          if (played) return;
-        }
-      } catch (err) {
-        console.warn('[Netra Audio] AI voice synthesis fallback:', err);
-      }
-    }
-
-    // 2. Local browser speech synthesis fallback
     this._speakBrowser(text, urgent);
   }
 
   _speakBrowser(text, urgent = false) {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    if (urgent) window.speechSynthesis.cancel();
+    if (urgent) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = this.speechRate;
@@ -188,14 +166,25 @@ class NetraAudioEngine {
     utterance.lang = langCode;
 
     if (this.voices && this.voices.length > 0) {
-      const match = this.voices.find(v => v.lang.startsWith(this.language) || v.lang.includes(langCode));
-      if (match) utterance.voice = match;
+      // Find matching language voices
+      const langMatches = this.voices.filter(v => v.lang.startsWith(this.language) || v.lang.includes(langCode));
+      // Select best natural / neural voice
+      const naturalVoice = langMatches.find(v => /natural|neural|google|online|premium/i.test(v.name));
+      if (naturalVoice) {
+        utterance.voice = naturalVoice;
+      } else if (langMatches.length > 0) {
+        utterance.voice = langMatches[0];
+      }
     }
 
     utterance.onend = () => { this.isSpeaking = false; };
     utterance.onerror = () => { this.isSpeaking = false; };
     this.isSpeaking = true;
-    window.speechSynthesis.speak(utterance);
+    try {
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.warn('[Netra Audio] Speech synthesis error:', e);
+    }
   }
 
   /**
