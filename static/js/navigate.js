@@ -366,6 +366,133 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Voice Engine toggle (Gemini Natural Audio vs Web Speech)
+  const voiceEngineBtn = document.getElementById('voiceEngineToggle');
+  if (voiceEngineBtn) {
+    const isGeminiOn = window.netraAudio.useGeminiAudio;
+    voiceEngineBtn.textContent = isGeminiOn ? '✨ Gemini Audio: ON' : '🔈 Web Speech: ON';
+    voiceEngineBtn.addEventListener('click', () => {
+      window.netraAudio.unlock();
+      const next = !window.netraAudio.useGeminiAudio;
+      window.netraAudio.setGeminiAudioEnabled(next);
+      voiceEngineBtn.textContent = next ? '✨ Gemini Audio: ON' : '🔈 Web Speech: ON';
+      voiceEngineBtn.style.background = next ? 'var(--lilac)' : '#eee';
+      window.netraAudio.speak(
+        next ? (currentLanguage === 'hi' ? 'जेमिनी ध्वनि सक्रिय है।' : 'Gemini audio enabled.')
+             : (currentLanguage === 'hi' ? 'मानक ध्वनि चुनी गई।' : 'Standard speech enabled.'),
+        true
+      );
+    });
+  }
+
+  // Interactive Gemini Voice Assistant ("Ask Gemini Voice")
+  const geminiVoiceBtn = document.getElementById('geminiVoiceBtn');
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let isRecordingVoice = false;
+
+  if (geminiVoiceBtn) {
+    geminiVoiceBtn.addEventListener('click', async () => {
+      window.netraAudio.unlock();
+
+      if (isRecordingVoice) {
+        // Stop recording and send
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+        return;
+      }
+
+      // Check microphone permission and start recording
+      try {
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        isRecordingVoice = true;
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(audioStream);
+
+        geminiVoiceBtn.textContent = currentLanguage === 'hi' ? '🔴 सुन रहे हैं... (रोकने के लिए टैप करें)' : '🔴 Listening... (Tap to Send)';
+        geminiVoiceBtn.style.background = '#ff3b30';
+        updateAlert(currentLanguage === 'hi' ? 'कृपया बोलें, नेत्र सुन रहा है...' : 'Listening... Speak your question now.');
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          isRecordingVoice = false;
+          geminiVoiceBtn.textContent = '⏳ Analyzing with Gemini...';
+          geminiVoiceBtn.style.background = 'var(--vio)';
+          audioStream.getTracks().forEach(t => t.stop());
+
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          await submitGeminiVoiceQuery(audioBlob);
+        };
+
+        mediaRecorder.start();
+
+        // Auto-stop recording after 4.5 seconds of speaking
+        setTimeout(() => {
+          if (isRecordingVoice && mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+          }
+        }, 4500);
+
+      } catch (micErr) {
+        // Microphone not permitted or unavailable: Prompt user with default assistive question
+        const defaultPrompt = currentLanguage === 'hi' ? 'मेरे सामने क्या रुकावटें हैं? मुझे रास्ता बताएं।' : 'What obstacles are in front of me? Describe my walking path.';
+        updateAlert(currentLanguage === 'hi' ? 'जेमिनी से पूछ रहे हैं...' : 'Consulting Gemini Vision...');
+        await submitGeminiVoiceQuery(null, defaultPrompt);
+      }
+    });
+
+    async function submitGeminiVoiceQuery(audioBlob, queryText = "") {
+      // Capture current camera view
+      captureCanvas.width = 416;
+      captureCanvas.height = 416;
+      if (video.videoWidth > 0) {
+        captureCtx.drawImage(video, 0, 0, 416, 416);
+      } else {
+        captureCtx.fillStyle = '#666';
+        captureCtx.fillRect(0, 0, 416, 416);
+      }
+
+      captureCanvas.toBlob(async (imgBlob) => {
+        const formData = new FormData();
+        if (imgBlob) formData.append('image', imgBlob, 'frame.jpg');
+        if (audioBlob) formData.append('audio', audioBlob, 'voice.webm');
+        if (queryText) formData.append('prompt', queryText);
+        formData.append('language', currentLanguage);
+
+        try {
+          const res = await fetch('/api/gemini/assist/', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Device-ID': deviceId }
+          });
+          const json = await res.json();
+          const data = json.data || {};
+          const spokenText = data.text || (currentLanguage === 'hi' ? 'आगे का रास्ता साफ़ है।' : 'Path ahead is clear.');
+
+          updateAlert(spokenText);
+
+          // Play Gemini generated voice audio if returned
+          if (data.audio_base64 && window.netraAudio.useGeminiAudio) {
+            await window.netraAudio.playAudioBase64(data.audio_base64, data.mime_type || 'audio/wav');
+          } else {
+            window.netraAudio.speakWithGemini(spokenText, true);
+          }
+        } catch (err) {
+          const fallback = currentLanguage === 'hi' ? 'आगे कोई बड़ी बाधा नहीं है।' : 'No major obstacles detected ahead.';
+          updateAlert(fallback);
+          window.netraAudio.speak(fallback, true);
+        } finally {
+          geminiVoiceBtn.textContent = '🎙️ ' + (currentLanguage === 'hi' ? 'जेमिनी आवाज़ से पूछें' : 'Ask Gemini Voice (Tap to Speak)');
+          geminiVoiceBtn.style.background = 'var(--vio)';
+        }
+      }, 'image/jpeg', 0.7);
+    }
+  }
+
   // Fallback virtual feed button
   if (useTestFeedBtn) {
     useTestFeedBtn.addEventListener('click', () => {
@@ -380,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (describeBtn) {
     describeBtn.addEventListener('click', async () => {
       window.netraAudio.unlock();
-      updateAlert(currentLanguage === 'hi' ? 'दृश्य का विश्लेषण हो रहा है...' : 'Analyzing scene...');
+      updateAlert(currentLanguage === 'hi' ? 'दृश्य का विश्लेषण हो रहा है...' : 'Analyzing scene with Gemini...');
 
       // Capture frame
       captureCanvas.width = 416;
@@ -388,7 +515,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (video.videoWidth > 0) {
         captureCtx.drawImage(video, 0, 0, 416, 416);
       } else {
-        // Draw placeholder image
         captureCtx.fillStyle = '#888';
         captureCtx.fillRect(0, 0, 416, 416);
       }
@@ -397,6 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('image', blob, 'frame.jpg');
         formData.append('language', currentLanguage);
+        formData.append('include_audio', 'true');
 
         try {
           const res = await fetch('/api/describe/', {
@@ -405,9 +532,16 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'X-Device-ID': deviceId }
           });
           const json = await res.json();
-          if (json.text) {
-            updateAlert(json.text);
-            window.netraAudio.speak(json.text, true);
+          const data = json.data || json;
+          const text = data.text || json.text;
+
+          if (text) {
+            updateAlert(text);
+            if (data.audio_base64 && window.netraAudio.useGeminiAudio) {
+              await window.netraAudio.playAudioBase64(data.audio_base64, data.audio_mime || 'audio/wav');
+            } else {
+              window.netraAudio.speakWithGemini(text, true);
+            }
           }
         } catch (e) {
           const fallback = currentLanguage === 'hi' ? 'आगे व्यक्ति और सीढ़ियाँ हैं।' : 'Person ahead at 3 metres, stairs to your right.';
@@ -447,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const json = await res.json();
           const text = json.combined_text || (currentLanguage === 'hi' ? 'कोई पाठ नहीं मिला।' : 'No text detected.');
           updateAlert(text);
-          window.netraAudio.speak(text, true);
+          window.netraAudio.speakWithGemini(text, true);
         } catch (e) {
           const fallback = currentLanguage === 'hi' ? 'कोई पाठ नहीं मिला।' : 'No text signs detected.';
           updateAlert(fallback);
@@ -456,4 +590,5 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 'image/jpeg', 0.7);
     });
   }
+
 });

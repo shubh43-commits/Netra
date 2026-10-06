@@ -82,14 +82,27 @@
         <button id="langToggle" class="chip" style="cursor: pointer; font-weight: 700;">
           🌐 {% trans "English" %}
         </button>
+        <button id="voiceEngineToggle" class="chip" style="cursor: pointer; font-weight: 700; background: var(--lilac); color: var(--ink);">
+          ✨ {% trans "Gemini Audio: ON" %}
+        </button>
       </div>
 
-      <!-- Cloud Assistive Tools (Describe & OCR) -->
+      <!-- Cloud Assistive Tools (Gemini Voice Assistant, Describe & OCR) -->
       <div style="margin-top: 20px; border-top: 1px solid rgba(21,18,31,0.1); padding-top: 16px;">
-        <h4 style="margin: 0 0 10px; font-size: 1rem;">{% trans "Assistive Vision Tools" %}</h4>
+        <h4 style="margin: 0 0 10px; font-size: 1rem;">{% trans "Gemini Assistive AI Tools" %}</h4>
+        
+        <!-- Interactive Gemini Voice Assistant -->
+        <button
+          id="geminiVoiceBtn"
+          class="btn pri"
+          style="width: 100%; min-height: 54px; font-size: 1.05rem; margin-bottom: 10px; background: var(--vio); color: #fff; box-shadow: 4px 4px 0 var(--ink);"
+        >
+          🎙️ {% trans "Ask Gemini Voice (Tap to Speak)" %}
+        </button>
+
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
           <button id="describeBtn" class="btn sec" style="flex: 1; min-height: 52px; font-size: 0.95rem;">
-            🎙️ {% trans "Describe Scene" %}
+            👁️ {% trans "Describe Scene (Gemini)" %}
           </button>
           <button id="ocrBtn" class="btn sec" style="flex: 1; min-height: 52px; font-size: 0.95rem;">
             🔤 {% trans "Read Signs (OCR)" %}
@@ -98,6 +111,7 @@
       </div>
     </div>
   </div>
+
 
   <!-- Quick Action Links -->
   <div class="cta" style="margin: 0 0 60px;">

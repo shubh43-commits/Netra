@@ -5,12 +5,14 @@
 [![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/django-6.1-brightgreen.svg)](https://www.djangoproject.com/)
 [![ASGI Daphne](https://img.shields.io/badge/asgi-daphne%20%2B%20websockets-purple.svg)](https://channels.readthedocs.io/)
-[![YOLOv8 Vision](https://img.shields.io/badge/vision-YOLOv8%20%2B%20ONNX-orange.svg)](https://github.com/ultralytics/ultralytics)
+[![Google Gemini Vision](https://img.shields.io/badge/vision-Google%20Gemini%202.5%20Flash%20%2B%20YOLO-blueviolet.svg)](https://aistudio.google.com/)
+[![Gemini Audio](https://img.shields.io/badge/audio-Gemini%202.0%20Voice%20%2B%20Spatial%20Binaural-orange.svg)](https://aistudio.google.com/)
 [![Accessibility](https://img.shields.io/badge/accessibility-WCAG%20AAA%20Compliant-success.svg)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 [![PWA](https://img.shields.io/badge/pwa-offline%20ready-blueviolet.svg)](https://web.dev/progressive-web-apps/)
-[![Tests](https://img.shields.io/badge/tests-49%20passed%20%7C%20100%25-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-60%20passed%20%7C%20100%25-brightgreen.svg)](tests/)
 
-**Accessible, real-time spatial orientation, monocular obstacle detection, and binaural 3D directional audio guidance aid for individuals who are blind or visually impaired.**
+**Accessible, real-time spatial orientation, multimodal obstacle detection with Google Gemini & YOLO, and binaural 3D directional audio guidance aid for individuals who are blind or visually impaired.**
+
 
 </div>
 

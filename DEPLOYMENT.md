@@ -50,13 +50,28 @@ CELERY_BROKER_URL=redis://redis:6379/0
 CELERY_RESULT_BACKEND=redis://redis:6379/0
 
 # Security & CORS
-SECURE_SSL_REDIRECT=True
-SESSION_COOKIE_SECURE=True
-CSRF_COOKIE_SECURE=True
+SECURE_SSL_REDIRECT=False
+SESSION_COOKIE_SECURE=False
+CSRF_COOKIE_SECURE=False
 CORS_ALLOWED_ORIGINS=https://netra.yourdomain.com
+CSRF_TRUSTED_ORIGINS=https://*.onrender.com,https://*.railway.app,https://netra.yourdomain.com
+
+# Google Gemini Vision & Audio Guidance (Recommended for Cloud Deployments)
+# Solves PyTorch OOM limits (512MB RAM) on Render/Railway free tiers
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_AUDIO_MODEL=gemini-2.0-flash
+VISION_BACKEND=auto  # Automatically uses Gemini in cloud / fallback
+
+# Initial Admin & Demo User Auto-Provisioning (Ensures instant login post-deploy)
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+DEMO_USERNAME=demo
+DEMO_PASSWORD=demo123
 ```
 
 ---
+
 
 ## 3. Docker Compose Production Deployment
 

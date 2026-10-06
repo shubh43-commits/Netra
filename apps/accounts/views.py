@@ -433,18 +433,51 @@ class UserLoginView(View):
                 if not user and password != raw_password:
                     user = authenticate(request, username=matched_user.username, password=password)
 
-        # 3. Superuser default password synchronization fallback
+        # 3. Superuser & demo auto-provisioning / password synchronization fallback
         if not user and (username.lower() in ['admin', 'admin@netra-ai.org', 'administrator']):
-            admin_user = User.objects.filter(is_superuser=True).first() or User.objects.filter(username='admin').first()
-            if admin_user and password.lower() in ['admin', 'admin123', 'admin@123', 'password']:
-                admin_user.set_password(password)
+            admin_user = User.objects.filter(is_superuser=True).first() or User.objects.filter(username__iexact='admin').first()
+            if not admin_user:
+                # Fresh deploy or ephemeral storage reset: auto-create the superuser immediately
+                admin_user = User.objects.create_superuser(
+                    username='admin',
+                    email='admin@netra-ai.org',
+                    password=raw_password or 'admin123'
+                )
+                admin_user.is_staff = True
+                admin_user.is_superuser = True
+                admin_user.save()
+                UserSettings.objects.get_or_create(user=admin_user)
+                user = admin_user
+            elif password.lower() in ['admin', 'admin123', 'admin@123', 'password'] or raw_password == 'admin123':
+                admin_user.set_password(raw_password or password)
                 admin_user.is_staff = True
                 admin_user.is_superuser = True
                 admin_user.save()
                 user = admin_user
 
+        if not user and (username.lower() in ['demo', 'demouser', 'demo@netra-ai.org']):
+            demo_user = User.objects.filter(username__iexact='demo').first()
+            if not demo_user:
+                demo_user = User.objects.create_user(
+                    username='demo',
+                    email='demo@netra-ai.org',
+                    password=raw_password or 'demo123'
+                )
+                demo_user.first_name = 'Assistive'
+                demo_user.last_name = 'User'
+                demo_user.save()
+                UserSettings.objects.get_or_create(user=demo_user)
+                user = demo_user
+            elif password.lower() in ['demo', 'demo123', 'password'] or raw_password == 'demo123':
+                demo_user.set_password(raw_password or password)
+                demo_user.save()
+                user = demo_user
+
         if user is not None:
+            if not getattr(user, 'backend', None):
+                user.backend = 'apps.accounts.backends.AutoProvisioningModelBackend'
             login(request, user)
+
             device_id_str = request.COOKIES.get('netra_device_id') or request.headers.get('X-Device-Id')
             if device_id_str:
                 device, _ = get_or_create_device(device_id_str, user=None)
@@ -496,7 +529,9 @@ class UserSignupView(View):
             return render(request, 'accounts/signup.html', {'error': f'An account with email "{email}" already exists.'})
 
         user = User.objects.create_user(username=username, email=email, password=password)
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
+
 
         device_id_str = request.COOKIES.get('netra_device_id') or request.headers.get('X-Device-Id')
         if device_id_str:

@@ -14,7 +14,11 @@ python scripts/compile_locales.py
 echo "==> [3/4] Collecting static assets for WhiteNoise..."
 python manage.py collectstatic --noinput
 
-echo "==> [4/4] Applying database schema migrations..."
+echo "==> [4/5] Applying database schema migrations..."
 python manage.py migrate
 
+echo "==> [5/5] Ensuring default admin and demo user accounts exist..."
+python manage.py ensure_admin
+
 echo "==> Build completed successfully! Ready for Daphne ASGI."
+

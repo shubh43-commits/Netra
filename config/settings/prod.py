@@ -16,7 +16,19 @@ allowed_hosts_raw = os.environ.get('ALLOWED_HOSTS', '')
 if allowed_hosts_raw:
     ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_raw.split(',') if h.strip()]
 else:
-    ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1', '*']
+    ALLOWED_HOSTS = ['*']
+
+# Dynamically ensure Render / Railway / Cloud domains are allowed
+render_host = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if render_host and render_host not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_host)
+
+railway_host = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if railway_host and railway_host not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(railway_host)
+
+if '*' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.extend(['.onrender.com', '.railway.app', '.up.railway.app', 'localhost', '127.0.0.1'])
 
 # CORS settings for production
 CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'True').lower() == 'true'
@@ -24,7 +36,13 @@ cors_origins_raw = os.environ.get('CORS_ALLOWED_ORIGINS', '')
 if cors_origins_raw:
     CORS_ALLOWED_ORIGINS = [orig.strip() for orig in cors_origins_raw.split(',') if orig.strip()]
 else:
-    CORS_ALLOWED_ORIGINS = ['https://*.onrender.com']
+    CORS_ALLOWED_ORIGINS = [
+        'https://*.onrender.com',
+        'http://*.onrender.com',
+        'https://*.railway.app',
+        'http://*.railway.app',
+    ]
+
 
 # Database: PostgreSQL if DATABASE_URL or DB_NAME provided, otherwise fallback to SQLite for free tiers
 database_url = os.environ.get('DATABASE_URL', '')
@@ -80,25 +98,71 @@ else:
         },
     }
 
-# Strict Production Security Headers & SSL
+# Production Security Headers & SSL
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True').lower() == 'true'
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Only enforce SSL redirect if explicitly configured or running on known HTTPS cloud platform
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+
+# Cookie Security & SameSite (Lax ensures cross-origin navigation & POST preservation)
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true' or SECURE_SSL_REDIRECT
+CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False').lower() == 'true' or SECURE_SSL_REDIRECT
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
+
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+
+# Comprehensive CSRF Trusted Origins for Cloud Deployments
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.onrender.com',
+    'http://*.onrender.com',
+    'https://*.railway.app',
+    'http://*.railway.app',
+    'https://*.up.railway.app',
+    'http://*.up.railway.app',
+    'https://*.vercel.app',
+    'https://*.fly.dev',
+    'https://*.run.app',
+    'https://*.appspot.com',
+    'https://*.herokuapp.com',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://127.0.0.1',
+    'http://localhost',
+]
 
 csrf_trusted_raw = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
 if csrf_trusted_raw:
-    CSRF_TRUSTED_ORIGINS = [orig.strip() for orig in csrf_trusted_raw.split(',') if orig.strip()]
-else:
-    CSRF_TRUSTED_ORIGINS = [
-        'https://*.onrender.com',
-        'http://*.onrender.com',
-        'http://127.0.0.1:8000',
-        'http://localhost:8000',
-    ]
+    for orig in csrf_trusted_raw.split(','):
+        cleaned = orig.strip()
+        if cleaned and cleaned not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(cleaned)
+
+# Automatically add dynamically detected cloud hostnames
+if render_host:
+    for scheme in ('https://', 'http://'):
+        h_url = f"{scheme}{render_host}"
+        if h_url not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(h_url)
+
+render_url = os.environ.get('RENDER_EXTERNAL_URL')
+if render_url and render_url not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append(render_url)
+
+if railway_host:
+    for scheme in ('https://', 'http://'):
+        h_url = f"{scheme}{railway_host}"
+        if h_url not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(h_url)
+
+# Add any custom domain from ALLOWED_HOSTS into CSRF_TRUSTED_ORIGINS
+for h in ALLOWED_HOSTS:
+    if h not in ('*', '.onrender.com', '.railway.app', '.up.railway.app'):
+        clean = h.lstrip('.')
+        for scheme in ('https://', 'http://'):
+            cand = f"{scheme}{clean}"
+            if cand not in CSRF_TRUSTED_ORIGINS:
+                CSRF_TRUSTED_ORIGINS.append(cand)
+

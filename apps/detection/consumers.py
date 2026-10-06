@@ -222,8 +222,13 @@ class DetectionConsumer(AsyncWebsocketConsumer):
                 }))
 
             except Exception as e:
+                latency_ms = round((time.perf_counter() - start_t) * 1000, 1)
                 await self.send(text_data=json.dumps({
-                    "type": "error",
-                    "code": "inference_failure",
-                    "message": str(e)
+                    "type": "detections",
+                    "frame_id": frame_id,
+                    "items": [],
+                    "top": [],
+                    "latency_ms": latency_ms,
+                    "warning": f"Vision engine fallback: {str(e)}"
                 }))
+

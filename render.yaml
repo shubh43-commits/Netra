@@ -13,8 +13,19 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: ".onrender.com,localhost,127.0.0.1"
+        value: "*"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://*.onrender.com"
+        value: "https://*.onrender.com,http://*.onrender.com,https://*.railway.app,https://*.up.railway.app"
       - key: CORS_ALLOW_ALL_ORIGINS
         value: "True"
+      - key: SECURE_SSL_REDIRECT
+        value: "False"
+      - key: VISION_BACKEND
+        value: "auto"
+      - key: GEMINI_MODEL
+        value: "gemini-2.5-flash"
+      - key: GEMINI_AUDIO_MODEL
+        value: "gemini-2.0-flash"
+      - key: GEMINI_API_KEY
+        sync: false
+

@@ -21,6 +21,8 @@ class NetraAudioEngine {
     this.vibrationEnabled = localStorage.getItem('netra_vibration') !== 'false';
     this.spatialBeepsEnabled = localStorage.getItem('netra_beeps') !== 'false';
     this.speechEnabled = localStorage.getItem('netra_speech') !== 'false';
+    this.useGeminiAudio = localStorage.getItem('netra_gemini_audio') !== 'false';
+
 
     this.lastSpokenText = '';
     this.lastSpokenTime = 0;
@@ -216,6 +218,91 @@ class NetraAudioEngine {
     }
   }
 
+  /**
+
+   * Plays base64-encoded audio bytes (from Gemini 2.0 Audio modality) through the Web Audio stereo pipeline.
+   * @param {string} base64Data - Raw base64 audio string
+   * @param {string} mimeType - MIME type, e.g. 'audio/wav', 'audio/mp3'
+   * @param {string} panDirection - 'left', 'ahead', 'right'
+   */
+  async playAudioBase64(base64Data, mimeType = 'audio/wav', panDirection = 'ahead') {
+    if (this.muted || !base64Data) return;
+    this.unlock();
+
+    try {
+      // Decode base64 to ArrayBuffer
+      const binaryString = window.atob(base64Data);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      if (this.audioCtx && typeof this.audioCtx.decodeAudioData === 'function') {
+        const audioBuffer = await this.audioCtx.decodeAudioData(bytes.buffer.slice(0));
+        const source = this.audioCtx.createBufferSource();
+        source.buffer = audioBuffer;
+
+        // Apply spatial panning if available
+        let panVal = 0.0;
+        if (panDirection === 'left') panVal = -0.75;
+        else if (panDirection === 'right') panVal = 0.75;
+
+        if (this.panner && this.panner.pan) {
+          this.panner.pan.setValueAtTime(panVal, this.audioCtx.currentTime);
+          source.connect(this.panner);
+        } else {
+          source.connect(this.masterGain);
+        }
+
+        source.start(0);
+        return true;
+      } else {
+        // Fallback: HTMLAudioElement
+        const blob = new Blob([bytes], { type: mimeType });
+        const audioUrl = URL.createObjectURL(blob);
+        const audio = new Audio(audioUrl);
+        audio.volume = this.volume;
+        await audio.play();
+        return true;
+      }
+    } catch (err) {
+      console.warn('[Netra Audio] Error playing Gemini audio:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Speaks assistive message using Gemini Natural Voice synthesis,
+   * falling back automatically to Web Speech API if offline or unavailable.
+   * @param {string} text - Text to speak
+   * @param {boolean} urgent - Prioritize over active playback
+   * @param {string} panDirection - Directional spatial bias
+   */
+  async speakWithGemini(text, urgent = false, panDirection = 'ahead') {
+    if (this.muted || !text) return;
+
+    if (this.useGeminiAudio) {
+      try {
+        const res = await fetch('/api/gemini/audio/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text, language: this.language })
+        });
+        const data = await res.json();
+        if (data.data && data.data.audio_base64) {
+          await this.playAudioBase64(data.data.audio_base64, data.data.mime_type || 'audio/wav', panDirection);
+          return;
+        }
+      } catch (e) {
+        console.warn('[Netra Audio] Gemini TTS unavailable, using local speech synthesis:', e);
+      }
+    }
+
+    // Local Web Speech API fallback
+    this.speak(text, urgent);
+  }
+
   setMuted(muted) {
     this.muted = muted;
     if (muted && typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -227,7 +314,13 @@ class NetraAudioEngine {
     this.language = lang;
     localStorage.setItem('netra_lang', lang);
   }
+
+  setGeminiAudioEnabled(enabled) {
+    this.useGeminiAudio = Boolean(enabled);
+    localStorage.setItem('netra_gemini_audio', this.useGeminiAudio ? 'true' : 'false');
+  }
 }
 
 // Global Netra audio singleton
 window.netraAudio = new NetraAudioEngine();
+

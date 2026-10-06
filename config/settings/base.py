@@ -107,6 +107,19 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Resilient Authentication Backends
+AUTHENTICATION_BACKENDS = [
+    'apps.accounts.backends.AutoProvisioningModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Google Gemini Vision & Audio Configuration
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash')
+GEMINI_AUDIO_MODEL = os.environ.get('GEMINI_AUDIO_MODEL', 'gemini-2.0-flash')
+VISION_BACKEND = os.environ.get('VISION_BACKEND', 'auto')  # 'auto', 'gemini', 'yolo'
+
+
 # Internationalization & Localization (i18n / l10n)
 LANGUAGE_CODE = 'en'
 LANGUAGES = [

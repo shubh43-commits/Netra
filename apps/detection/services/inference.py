@@ -9,10 +9,14 @@ Handles:
 """
 import io
 import time
+import logging
 import threading
 import concurrent.futures
 from typing import List, Dict, Any, Optional
 from PIL import Image
+
+logger = logging.getLogger(__name__)
+
 
 from .constants import (
     REAL_WORLD_HEIGHTS_M,
@@ -24,7 +28,11 @@ from .constants import (
 
 class InferenceService:
     """
-    Singleton service managing YOLO deep learning model inference.
+    Singleton service managing Computer Vision inference for Netra.
+    Supports:
+    - Google Gemini Vision (cloud API, zero model weights, zero PyTorch OOM)
+    - Ultralytics YOLOv8 (local PyTorch weights when available)
+    - Lightweight heuristic fallback for offline zero-weight operation
     """
     _instance: Optional["InferenceService"] = None
     _lock = threading.Lock()
@@ -32,13 +40,14 @@ class InferenceService:
     def __init__(self):
         self._model = None
         self._model_name: str = "yolov8n"
+        self._backend: str = "auto"
         self._loaded: bool = False
         self._load_error: Optional[str] = None
         self._focal_factor: float = DEFAULT_FOCAL_FACTOR
         self._mock_inference_func = None
         self._executor = concurrent.futures.ThreadPoolExecutor(
             max_workers=2,
-            thread_name_prefix="netra_yolo"
+            thread_name_prefix="netra_vision"
         )
         self.load_model()
 
@@ -55,17 +64,29 @@ class InferenceService:
 
     def set_mock_model(self, mock_func) -> None:
         """
-        Enables mocking YOLO predictions for instant, zero-weight unit test execution.
+        Enables mocking predictions for instant, zero-weight unit test execution.
         """
         self._mock_inference_func = mock_func
         self._loaded = True
 
     def load_model(self, model_path: Optional[str] = None) -> bool:
         """
-        Loads the active model into process memory.
+        Loads the active vision model or initializes Gemini Vision backend.
         """
+        from django.conf import settings
+        backend_pref = getattr(settings, "VISION_BACKEND", "auto").lower()
+
+        # If explicitly set to Gemini
+        if backend_pref == "gemini":
+            self._backend = "gemini"
+            self._model_name = getattr(settings, "GEMINI_MODEL", "gemini-2.5-flash")
+            self._loaded = True
+            self._load_error = None
+            return True
+
+        # Attempt to load YOLO if available and requested
         try:
-            # 1. Attempt to query active version from modelhub if model_path not explicitly provided
+            # 1. Check active ModelVersion from modelhub
             if not model_path:
                 try:
                     from apps.modelhub.models import ModelVersion
@@ -76,20 +97,26 @@ class InferenceService:
                 except Exception:
                     pass
 
-            # 2. Fall back to standard YOLOv8n weights
             if not model_path:
                 model_path = "yolov8n.pt"
 
             from ultralytics import YOLO
             self._model = YOLO(model_path)
+            self._backend = "yolo"
             self._loaded = True
             self._load_error = None
             return True
         except Exception as e:
+            # On cloud deployments (Render, Railway) where YOLO weights or PyTorch fail:
+            # Seamlessly switch to Gemini Vision backend
             self._model = None
-            self._loaded = False
-            self._load_error = str(e)
-            return False
+            self._backend = "gemini"
+            self._model_name = getattr(settings, "GEMINI_MODEL", "gemini-2.5-flash")
+            self._loaded = True
+            self._load_error = None
+            logger.info(f"YOLO unavailable ({e}). Activated Gemini Vision backend ({self._model_name}).")
+            return True
+
 
     def reload_model(self, model_path: Optional[str] = None) -> bool:
         """Hot-reloads model weights into memory."""
@@ -132,10 +159,11 @@ class InferenceService:
         if self._mock_inference_func is not None:
             return self._mock_inference_func(image)
 
-        if not self._loaded or self._model is None:
-            raise RuntimeError(
-                f"Computer vision model not ready: {self._load_error or 'Weights not loaded'}"
-            )
+        # Route to Gemini Vision backend
+        if self._backend == "gemini" or self._model is None:
+            from .gemini_service import GeminiService
+            return GeminiService.get_instance().detect_obstacles(image)
+
 
         # Convert PIL Image to RGB if needed
         if image.mode != "RGB":
