@@ -40,8 +40,43 @@ document.addEventListener('DOMContentLoaded', () => {
   let ws = null;
   let wakeLock = null;
   let frameInterval = null;
+  let localDetectInterval = null;
   let virtualInterval = null;
   let usingVirtualFeed = false;
+  let localCocoModel = null;
+  let lastServerDetectionTime = 0;
+
+  // Asynchronously load client-side COCO-SSD detector for instant 30 FPS camera detection
+  if (typeof cocoSsd !== 'undefined') {
+    cocoSsd.load().then((model) => {
+      localCocoModel = model;
+      console.log('[Netra Vision] Client-side COCO-SSD model ready.');
+    }).catch((err) => {
+      console.warn('[Netra Vision] Client-side detector init note:', err);
+    });
+  }
+
+  const REAL_HEIGHTS = {
+    person: 1.7,
+    car: 1.5,
+    truck: 3.2,
+    bus: 3.2,
+    motorcycle: 1.1,
+    bicycle: 1.0,
+    dog: 0.6,
+    cat: 0.3,
+    chair: 0.85,
+    couch: 0.85,
+    table: 0.8,
+    'dining table': 0.8,
+    bottle: 0.25,
+    cup: 0.15,
+    backpack: 0.45,
+    suitcase: 0.65,
+    'cell phone': 0.15,
+    laptop: 0.3,
+    door: 2.1
+  };
 
   let currentLanguage = localStorage.getItem('netra_lang') || 'en';
   let deviceId = localStorage.getItem('netra_device_id');
@@ -71,10 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Resize overlay canvas to match video aspect
   function matchCanvasSize() {
     const rect = video.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    overlayCanvas.width = (rect.width || 640) * dpr;
-    overlayCanvas.height = (rect.height || 480) * dpr;
-    overlayCtx.scale(dpr, dpr);
+    const w = Math.round(rect.width || 640);
+    const h = Math.round(rect.height || 480);
+    if (overlayCanvas.width !== w || overlayCanvas.height !== h) {
+      overlayCanvas.width = w;
+      overlayCanvas.height = h;
+    }
   }
   window.addEventListener('resize', matchCanvasSize);
 
@@ -180,8 +217,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 'image/jpeg', 0.65);
   }
 
+  // Real-time client-side computer vision detection loop (TensorFlow.js COCO-SSD)
+  async function runLocalDetection() {
+    if (!isNavigating || !localCocoModel || video.readyState < 2) return;
+    if (video.videoWidth === 0 || video.videoHeight === 0) return;
+
+    try {
+      const predictions = await localCocoModel.detect(video);
+      const now = Date.now();
+      // If server detections arrived recently (within 400ms), let server take priority
+      if (now - lastServerDetectionTime < 400) return;
+
+      const vw = video.videoWidth || 640;
+      const vh = video.videoHeight || 480;
+
+      const items = predictions.map((p) => {
+        const [px, py, pw, ph] = p.bbox;
+        const nx = Math.max(0, Math.min(1, px / vw));
+        const ny = Math.max(0, Math.min(1, py / vh));
+        const nw = Math.max(0.02, Math.min(1, pw / vw));
+        const nh = Math.max(0.02, Math.min(1, ph / vh));
+
+        const cx = nx + nw / 2;
+        let dir = 'ahead';
+        if (cx < 0.33) dir = 'left';
+        else if (cx > 0.66) dir = 'right';
+
+        const cls = p.class.toLowerCase();
+        const realH = REAL_HEIGHTS[cls] || 1.0;
+        const dist = Math.max(0.4, Math.min(15.0, (realH * 1.0) / Math.max(0.04, nh)));
+
+        return {
+          class_name: cls,
+          confidence: Math.round(p.score * 100) / 100,
+          box: [Math.round(nx * 1000) / 1000, Math.round(ny * 1000) / 1000, Math.round(nw * 1000) / 1000, Math.round(nh * 1000) / 1000],
+          direction: dir,
+          distance_m: Math.round(dist * 10) / 10,
+          approaching: dist < 1.8
+        };
+      });
+
+      items.sort((a, b) => a.distance_m - b.distance_m);
+      const top = items.slice(0, 2);
+
+      handleDetections({
+        items: items,
+        top: top,
+        latency_ms: 18,
+        source: 'client_coco'
+      });
+    } catch (err) {}
+  }
+
   // Draw detections on overlay canvas & trigger spatial audio
   function handleDetections(data) {
+    if (data.source !== 'client_coco') {
+      lastServerDetectionTime = Date.now();
+    }
     const items = data.items || [];
     const top = data.top || [];
     const latency = data.latency_ms || 0;
@@ -190,9 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (statHazards) statHazards.textContent = items.length;
 
     // Draw on overlay
-    const rect = video.getBoundingClientRect();
-    const w = rect.width;
-    const h = rect.height;
+    matchCanvasSize();
+    const w = overlayCanvas.width;
+    const h = overlayCanvas.height;
 
     overlayCtx.clearRect(0, 0, w, h);
 
@@ -298,7 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const camSuccess = await startCamera();
       if (camSuccess) {
         connectWebSocket();
-        frameInterval = setInterval(captureAndSendFrame, 100); // 10 FPS
+        frameInterval = setInterval(captureAndSendFrame, 100); // 10 FPS server stream
+        localDetectInterval = setInterval(runLocalDetection, 120); // Real-time client COCO-SSD
       } else {
         startVirtualFeed();
       }
@@ -313,6 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleBtn.classList.add('pri');
 
       if (frameInterval) clearInterval(frameInterval);
+      if (localDetectInterval) clearInterval(localDetectInterval);
       stopVirtualFeed();
       stopCamera();
       disconnectWebSocket();

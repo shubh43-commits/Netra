@@ -62,8 +62,13 @@ media/reports/*
 *.key
 *.crt
 
-# Machine Learning weights, runs, and cache (models managed via ModelHub / release assets)
-yolov8*.pt
+# Machine Learning weights, runs, and cache
+!yolov8n.pt
+yolov8s*.pt
+yolov8m*.pt
+yolov8l*.pt
+yolov8x*.pt
+
 *.onnx
 *.tflite
 *.engine

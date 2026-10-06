@@ -86,28 +86,38 @@ class InferenceService:
 
         # Attempt to load YOLO if available and requested
         try:
+            import os
             # 1. Check active ModelVersion from modelhub
             if not model_path:
                 try:
                     from apps.modelhub.models import ModelVersion
                     active_version = ModelVersion.objects.filter(model_type='yolo_pt', is_active=True).first()
                     if active_version and active_version.weights_file:
-                        model_path = active_version.weights_file.path
-                        self._model_name = active_version.version
+                        cand_path = active_version.weights_file.path
+                        if os.path.exists(cand_path) and os.path.getsize(cand_path) > 100000:
+                            model_path = cand_path
+                            self._model_name = active_version.version
                 except Exception:
                     pass
 
             if not model_path:
-                model_path = "yolov8n.pt"
+                base_dir_pt = os.path.join(settings.BASE_DIR, "yolov8n.pt")
+                if os.path.exists(base_dir_pt) and os.path.getsize(base_dir_pt) > 100000:
+                    model_path = base_dir_pt
+                elif os.path.exists("yolov8n.pt") and os.path.getsize("yolov8n.pt") > 100000:
+                    model_path = "yolov8n.pt"
+                else:
+                    model_path = "yolov8n.pt"
 
             from ultralytics import YOLO
             self._model = YOLO(model_path)
             self._backend = "yolo"
+            self._model_name = "yolov8n"
             self._loaded = True
             self._load_error = None
             return True
         except Exception as e:
-            # On cloud deployments (Render, Railway) where YOLO weights or PyTorch fail:
+            # On cloud deployments where YOLO weights or PyTorch fail:
             # Seamlessly switch to Gemini Vision backend
             self._model = None
             self._backend = "gemini"
@@ -151,7 +161,7 @@ class InferenceService:
             return "right"
         return "ahead"
 
-    def _sync_predict(self, image: Image.Image, imgsz: int = 416, conf: float = 0.35) -> List[Dict[str, Any]]:
+    def _sync_predict(self, image: Image.Image, imgsz: int = 416, conf: float = 0.25) -> List[Dict[str, Any]]:
         """
         Synchronous prediction pipeline executed inside the worker thread pool.
         """
@@ -228,7 +238,7 @@ class InferenceService:
         self,
         image: Image.Image,
         imgsz: int = 416,
-        conf: float = 0.35
+        conf: float = 0.25
     ) -> concurrent.futures.Future:
         """
         Dispatches inference to the thread pool and returns a Future.
@@ -239,7 +249,7 @@ class InferenceService:
         self,
         image_bytes: bytes,
         imgsz: int = 416,
-        conf: float = 0.35
+        conf: float = 0.25
     ) -> List[Dict[str, Any]]:
         """
         Decodes in-memory image bytes (JPEG) and executes inference synchronously within thread.

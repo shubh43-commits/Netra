@@ -37,7 +37,7 @@ class NetraAudioEngine {
         this.voices = window.speechSynthesis.getVoices();
       };
       this.voices = window.speechSynthesis.getVoices();
-    }
+    this.audioCache = new Map();
   }
 
   /**
@@ -67,7 +67,6 @@ class NetraAudioEngine {
         this.panner = this.audioCtx.createStereoPanner();
         this.panner.connect(this.masterGain);
       } else {
-        // Fallback for older Safari
         this.panner = null;
       }
 
@@ -94,13 +93,11 @@ class NetraAudioEngine {
       const osc = this.audioCtx.createOscillator();
       const noteGain = this.audioCtx.createGain();
 
-      // Pitch calculation: closer = higher frequency (320 Hz at 8m up to 920 Hz at 0.5m)
       const clampedDist = Math.max(0.4, Math.min(8.0, distanceM));
       const freq = 920 - ((clampedDist - 0.4) / (8.0 - 0.4)) * 600;
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now);
 
-      // Stereo pan: left = -0.9, ahead = 0.0, right = +0.9
       let panVal = 0.0;
       if (direction === 'left') panVal = -0.9;
       else if (direction === 'right') panVal = 0.9;
@@ -112,7 +109,6 @@ class NetraAudioEngine {
         noteGain.connect(this.masterGain);
       }
 
-      // Envelope: smooth attack & decay to prevent clicking
       noteGain.gain.setValueAtTime(0.001, now);
       noteGain.gain.exponentialRampToValueAtTime(0.6 * this.volume, now + 0.02);
       noteGain.gain.exponentialRampToValueAtTime(0.001, now + durationSec);
@@ -127,12 +123,13 @@ class NetraAudioEngine {
 
   /**
    * Speak a spoken warning aloud with rate and queue throttling.
+   * Automatically uses natural Gemini / Neural AI audio when enabled.
    * @param {string} text - Message to speak
    * @param {boolean} urgent - If true, cancels ongoing speech to announce immediately
+   * @param {string} direction - 'left', 'ahead', 'right'
    */
-  speak(text, urgent = false) {
+  async speak(text, urgent = false, direction = 'ahead') {
     if (this.muted || !this.speechEnabled || !text) return;
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     const now = Date.now();
     // Prevent repeating identical sentence within 3 seconds unless urgent
@@ -140,32 +137,63 @@ class NetraAudioEngine {
       return;
     }
 
-    if (urgent) {
-      window.speechSynthesis.cancel();
+    this.lastSpokenText = text;
+    this.lastSpokenTime = now;
+
+    // 1. Natural AI speech via Gemini / Neural TTS
+    if (this.useGeminiAudio) {
+      try {
+        const cacheKey = `${this.language}:${text}`;
+        let cached = this.audioCache.get(cacheKey);
+
+        if (!cached) {
+          const resp = await fetch('/api/gemini/audio/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text, language: this.language })
+          });
+          if (resp.ok) {
+            const json = await resp.json();
+            const d = json.data || {};
+            if (d.audio_base64) {
+              cached = { b64: d.audio_base64, mime: d.mime_type || 'audio/wav' };
+              if (this.audioCache.size > 50) this.audioCache.clear();
+              this.audioCache.set(cacheKey, cached);
+            }
+          }
+        }
+
+        if (cached && cached.b64) {
+          const played = await this.playAudioBase64(cached.b64, cached.mime, direction);
+          if (played) return;
+        }
+      } catch (err) {
+        console.warn('[Netra Audio] AI voice synthesis fallback:', err);
+      }
     }
+
+    // 2. Local browser speech synthesis fallback
+    this._speakBrowser(text, urgent);
+  }
+
+  _speakBrowser(text, urgent = false) {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (urgent) window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = this.speechRate;
     utterance.volume = this.volume;
 
-    // Select voice according to language
     const langCode = this.language === 'hi' ? 'hi-IN' : 'en-IN';
     utterance.lang = langCode;
 
-    if (this.voices.length > 0) {
+    if (this.voices && this.voices.length > 0) {
       const match = this.voices.find(v => v.lang.startsWith(this.language) || v.lang.includes(langCode));
       if (match) utterance.voice = match;
     }
 
-    utterance.onend = () => {
-      this.isSpeaking = false;
-    };
-    utterance.onerror = () => {
-      this.isSpeaking = false;
-    };
-
-    this.lastSpokenText = text;
-    this.lastSpokenTime = now;
+    utterance.onend = () => { this.isSpeaking = false; };
+    utterance.onerror = () => { this.isSpeaking = false; };
     this.isSpeaking = true;
     window.speechSynthesis.speak(utterance);
   }
@@ -187,9 +215,7 @@ class NetraAudioEngine {
       } else {
         navigator.vibrate(60);
       }
-    } catch (e) {
-      // Vibration not permitted or supported
-    }
+    } catch (e) {}
   }
 
   /**
@@ -212,25 +238,24 @@ class NetraAudioEngine {
       this.vibrate('warning');
     }
 
-    // Speak
+    // Speak with spatial direction and AI natural voice
     if (spokenText) {
-      this.speak(spokenText, dist < 1.8);
+      this.speak(spokenText, dist < 1.8, dir);
     }
   }
 
   /**
-
-   * Plays base64-encoded audio bytes (from Gemini 2.0 Audio modality) through the Web Audio stereo pipeline.
+   * Plays base64-encoded audio bytes (from Gemini 2.0 / Neural TTS) through the Web Audio stereo pipeline.
    * @param {string} base64Data - Raw base64 audio string
    * @param {string} mimeType - MIME type, e.g. 'audio/wav', 'audio/mp3'
    * @param {string} panDirection - 'left', 'ahead', 'right'
    */
   async playAudioBase64(base64Data, mimeType = 'audio/wav', panDirection = 'ahead') {
-    if (this.muted || !base64Data) return;
+    if (this.muted || !base64Data) return false;
     this.unlock();
 
     try {
-      // Decode base64 to ArrayBuffer
+      // Decode base64 to Uint8Array
       const binaryString = window.atob(base64Data);
       const len = binaryString.length;
       const bytes = new Uint8Array(len);
@@ -238,69 +263,49 @@ class NetraAudioEngine {
         bytes[i] = binaryString.charCodeAt(i);
       }
 
-      if (this.audioCtx && typeof this.audioCtx.decodeAudioData === 'function') {
-        const audioBuffer = await this.audioCtx.decodeAudioData(bytes.buffer.slice(0));
-        const source = this.audioCtx.createBufferSource();
-        source.buffer = audioBuffer;
+      // 1. Try Web Audio API for spatial stereo panning
+      if (this.audioCtx) {
+        try {
+          const audioBuffer = await this.audioCtx.decodeAudioData(bytes.buffer.slice(0));
+          const source = this.audioCtx.createBufferSource();
+          source.buffer = audioBuffer;
 
-        // Apply spatial panning if available
-        let panVal = 0.0;
-        if (panDirection === 'left') panVal = -0.75;
-        else if (panDirection === 'right') panVal = 0.75;
+          let panVal = 0.0;
+          if (panDirection === 'left') panVal = -0.75;
+          else if (panDirection === 'right') panVal = 0.75;
 
-        if (this.panner && this.panner.pan) {
-          this.panner.pan.setValueAtTime(panVal, this.audioCtx.currentTime);
-          source.connect(this.panner);
-        } else {
-          source.connect(this.masterGain);
+          if (this.panner && this.panner.pan) {
+            this.panner.pan.setValueAtTime(panVal, this.audioCtx.currentTime);
+            source.connect(this.panner);
+          } else {
+            source.connect(this.masterGain);
+          }
+
+          source.start(0);
+          return true;
+        } catch (decodeErr) {
+          console.warn('[Netra Audio] decodeAudioData error, falling back to HTMLAudioElement:', decodeErr);
         }
-
-        source.start(0);
-        return true;
-      } else {
-        // Fallback: HTMLAudioElement
-        const blob = new Blob([bytes], { type: mimeType });
-        const audioUrl = URL.createObjectURL(blob);
-        const audio = new Audio(audioUrl);
-        audio.volume = this.volume;
-        await audio.play();
-        return true;
       }
+
+      // 2. Direct HTMLAudioElement fallback
+      const blob = new Blob([bytes], { type: mimeType });
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+      audio.volume = this.volume;
+      await audio.play();
+      return true;
     } catch (err) {
-      console.warn('[Netra Audio] Error playing Gemini audio:', err);
+      console.warn('[Netra Audio] Error playing audio:', err);
       return false;
     }
   }
 
   /**
-   * Speaks assistive message using Gemini Natural Voice synthesis,
-   * falling back automatically to Web Speech API if offline or unavailable.
-   * @param {string} text - Text to speak
-   * @param {boolean} urgent - Prioritize over active playback
-   * @param {string} panDirection - Directional spatial bias
+   * Speaks assistive message using Gemini Natural Voice synthesis.
    */
   async speakWithGemini(text, urgent = false, panDirection = 'ahead') {
-    if (this.muted || !text) return;
-
-    if (this.useGeminiAudio) {
-      try {
-        const res = await fetch('/api/gemini/audio/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text, language: this.language })
-        });
-        const data = await res.json();
-        if (data.data && data.data.audio_base64) {
-          await this.playAudioBase64(data.data.audio_base64, data.data.mime_type || 'audio/wav', panDirection);
-          return;
-        }
-      } catch (e) {
-        console.warn('[Netra Audio] Gemini TTS unavailable, using local speech synthesis:', e);
-      }
-    }
-
-    // Local Web Speech API fallback
-    this.speak(text, urgent);
+    return this.speak(text, urgent, panDirection);
   }
 
   setMuted(muted) {

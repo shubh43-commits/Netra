@@ -12,6 +12,7 @@ import io
 import os
 import json
 import base64
+import struct
 import logging
 from typing import List, Dict, Any, Optional
 from PIL import Image
@@ -20,6 +21,37 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
+
+
+def pcm16_to_wav(pcm_bytes: bytes, sample_rate: int = 24000, num_channels: int = 1) -> bytes:
+    """
+    Wraps raw 16-bit linear PCM audio in a valid RIFF/WAVE header so any browser can decode it.
+    Gemini 2.0 Flash Audio returns raw linear PCM16 (24000 Hz, mono).
+    """
+    bits_per_sample = 16
+    byte_rate = sample_rate * num_channels * (bits_per_sample // 8)
+    block_align = num_channels * (bits_per_sample // 8)
+    data_size = len(pcm_bytes)
+    chunk_size = 36 + data_size
+
+    header = struct.pack(
+        "<4sI4s4sIHHIIHH4sI",
+        b"RIFF",
+        chunk_size,
+        b"WAVE",
+        b"fmt ",
+        16,  # Subchunk1Size
+        1,   # AudioFormat 1 = PCM
+        num_channels,
+        sample_rate,
+        byte_rate,
+        block_align,
+        bits_per_sample,
+        b"data",
+        data_size,
+    )
+    return header + pcm_bytes
+
 
 
 class GeminiService:
@@ -326,60 +358,107 @@ class GeminiService:
         res["engine"] = "local"
         return res
 
+    def _google_neural_tts(self, text: str, language: str = "en") -> Optional[Dict[str, Any]]:
+        """
+        High-fidelity Google Neural Text-to-Speech fallback.
+        Produces crisp, natural AI spoken voice in English or Hindi.
+        Returns base64 MP3 audio and audio/mp3 MIME type.
+        """
+        if not text or not text.strip():
+            return None
+        import httpx
+        import urllib.parse
+        try:
+            lang_code = "hi" if str(language).lower().startswith("hi") else "en"
+            clean_text = text.strip()[:240]
+            url = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_code}&client=tw-ob&q={urllib.parse.quote(clean_text)}"
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+            with httpx.Client(timeout=4.5) as client:
+                resp = client.get(url, headers=headers)
+                if resp.status_code == 200 and len(resp.content) > 400:
+                    b64 = base64.b64encode(resp.content).decode("utf-8")
+                    return {
+                        "audio_base64": b64,
+                        "mime_type": "audio/mp3",
+                        "text": text,
+                        "engine": "google_neural"
+                    }
+        except Exception as e:
+            logger.warning(f"Google Neural TTS fallback error: {e}")
+        return None
+
     def synthesize_speech_audio(self, text: str, language: str = "en") -> Optional[Dict[str, Any]]:
         """
-        Synthesizes spoken audio from text using Gemini Audio output modality.
-        Returns base64 audio and MIME type for direct browser playback.
+        Synthesizes spoken audio from text using Gemini 2.0 Flash Audio output modality,
+        with seamless high-fidelity Google Neural TTS fallback.
+        Converts headerless raw PCM to standard playable WAV for browsers.
         """
-        if not self.has_api_key() or not text:
+        if not text:
             return None
 
-        prompt = (
-            f"Please speak the following assistive guidance message aloud in a clear, warm, "
-            f"friendly tone for a visually impaired user. Say ONLY this text, nothing else:\n\n{text}"
-        )
+        # If Gemini API key is configured, query Gemini 2.0 Flash Audio
+        if self.has_api_key():
+            prompt = (
+                f"Please speak the following assistive guidance message aloud in a clear, warm, "
+                f"friendly tone for a visually impaired user. Say ONLY this text, nothing else:\n\n{text}"
+            )
 
-        payload = {
-            "contents": [
-                {
-                    "parts": [{"text": prompt}]
-                }
-            ],
-            "generationConfig": {
-                "response_modalities": ["AUDIO"],
-                "speechConfig": {
-                    "voiceConfig": {
-                        "prebuiltVoiceConfig": {
-                            "voiceName": "Puck" if language == "en" else "Aoede"
+            payload = {
+                "contents": [
+                    {
+                        "parts": [{"text": prompt}]
+                    }
+                ],
+                "generationConfig": {
+                    "response_modalities": ["AUDIO"],
+                    "speechConfig": {
+                        "voiceConfig": {
+                            "prebuiltVoiceConfig": {
+                                "voiceName": "Puck" if language == "en" else "Aoede"
+                            }
                         }
                     }
                 }
             }
-        }
 
-        # Query audio-capable model
-        data = self._call_gemini_api(self.audio_model, payload, timeout=8.0)
-        if not data:
-            return None
+            # Query audio-capable model
+            data = self._call_gemini_api(self.audio_model, payload, timeout=8.0)
+            if data:
+                try:
+                    candidates = data.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        for p in parts:
+                            inline = p.get("inline_data") or p.get("inlineData")
+                            if inline and inline.get("data"):
+                                raw_b64 = inline["data"]
+                                mime = inline.get("mime_type") or inline.get("mimeType") or "audio/wav"
 
-        try:
-            candidates = data.get("candidates", [])
-            if not candidates:
-                return None
-            parts = candidates[0].get("content", {}).get("parts", [])
-            for p in parts:
-                inline = p.get("inline_data") or p.get("inlineData")
-                if inline and inline.get("data"):
-                    mime = inline.get("mime_type") or inline.get("mimeType") or "audio/wav"
-                    return {
-                        "audio_base64": inline["data"],
-                        "mime_type": mime,
-                        "text": text
-                    }
-        except Exception as e:
-            logger.warning(f"Error reading Gemini audio synthesis: {e}")
+                                # Gemini 2.0 Flash returns raw linear PCM16 (audio/pcm;rate=24000)
+                                # Wrap in 44-byte RIFF/WAVE header so any browser can decode it
+                                if "pcm" in mime.lower() or "rate=24000" in mime.lower():
+                                    try:
+                                        pcm_bytes = base64.b64decode(raw_b64)
+                                        wav_bytes = pcm16_to_wav(pcm_bytes, sample_rate=24000, num_channels=1)
+                                        raw_b64 = base64.b64encode(wav_bytes).decode("utf-8")
+                                        mime = "audio/wav"
+                                    except Exception as ex:
+                                        logger.warning(f"Error wrapping PCM to WAV: {ex}")
 
-        return None
+                                return {
+                                    "audio_base64": raw_b64,
+                                    "mime_type": mime,
+                                    "text": text,
+                                    "engine": "gemini"
+                                }
+                except Exception as e:
+                    logger.warning(f"Error reading Gemini audio synthesis: {e}")
+
+        # Natural AI speech fallback (Google Neural TTS)
+        return self._google_neural_tts(text, language=language)
+
 
     def ask_voice_assistant(
         self,
@@ -403,10 +482,11 @@ class GeminiService:
                 "नेत्र सक्रिय है। आगे रास्ता साफ़ है।" if lang == "hi"
                 else "Netra is active. Path ahead appears clear."
             )
+            tts_res = self._google_neural_tts(fallback_text, language=lang)
             return {
                 "text": fallback_text,
-                "audio_base64": None,
-                "mime_type": None,
+                "audio_base64": tts_res.get("audio_base64") if tts_res else None,
+                "mime_type": tts_res.get("mime_type", "audio/mp3") if tts_res else None,
                 "language": lang,
                 "engine": "fallback"
             }

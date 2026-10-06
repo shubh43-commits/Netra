@@ -202,7 +202,7 @@ class DetectionConsumer(AsyncWebsocketConsumer):
                     inference.decode_and_predict,
                     bytes_data,
                     self.imgsz,
-                    0.35
+                    0.25
                 )
 
                 # Track approach velocity and persistence
